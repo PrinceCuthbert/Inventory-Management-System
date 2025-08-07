@@ -1,78 +1,92 @@
-import { Moon, Sun, Globe } from "lucide-react";
-import { Button } from "../components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+import { useState, useEffect, useRef } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
+import "../css/header.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
-import { SidebarTrigger } from "../components/ui/sidebar";
-// import { useTheme } from "../context/ThemeContext";
-import { useTheme } from "../context/Theme/ThemeContext";
-import { useLanguage } from "../hooks/useLanguage";
+function Header({ toggleSidebar, isSidebarCollapsed }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [hoverColor, setHoverColor] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const dropdownRef = useRef(null); // for detecting outside clicks
 
-function Header() {
-  const { theme, setTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const toggleDropdown = () => setMenuOpen((prev) => !prev);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const computedStyle = getComputedStyle(root);
+    const colorVar = computedStyle.getPropertyValue("--btn-hover-bg").trim();
+    setHoverColor(colorVar);
+  }, [isHovered]);
+
+  // 🔐 Close dropdown if user clicks outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
 
   return (
-    <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 shadow-card">
-      <div className="flex items-center gap-4">
-        <SidebarTrigger className="lg:hidden" />
-        <div className="text-sm text-muted-foreground">
-          Welcome to InvenFlow
-        </div>
-      </div>
+    <div className="layout">
+      <div className="main-area">
+        <header className="topbar">
+          <div className="header-links">
+            <button
+              style={{ background: "none", border: "none" }}
+              onClick={toggleSidebar}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}>
+              <i
+                className="fa fa-cube"
+                aria-hidden="true"
+                style={{
+                  fontSize: "1.5rem",
+                  color: isHovered ? hoverColor : "inherit",
+                  transition: "transform 0.7s ease, color 0.3s ease",
+                  transform: isSidebarCollapsed
+                    ? "rotate(90deg)"
+                    : "rotate(0deg)",
+                }}></i>
+            </button>
+            <p className="brand">Welcome to InvenFlow</p>
+          </div>
 
-      <div className="flex items-center gap-2">
-        {/* Language Toggle */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2">
-              <Globe className="h-4 w-4" />
-              <span className="hidden sm:inline-block">
-                {language === "en" ? "English" : "Kinyarwanda"}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => setLanguage("en")}
-              className={language === "en" ? "bg-accent" : ""}>
-              English
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => setLanguage("rw")}
-              className={language === "rw" ? "bg-accent" : ""}>
-              Kinyarwanda
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* Desktop header-right */}
+          <div className="header-right desktop-only">
+            <i className="fa fa-language" aria-hidden="true"></i>
+            <ThemeToggle />
+            <i className="fa fa-sign-in" aria-hidden="true"></i>
+          </div>
 
-        {/* Theme Toggle */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="relative">
-              <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              Light
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              Dark
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              System
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* Hamburger toggle for mobile */}
+          <div className="mobile-only">
+            <button
+              className="dropdown-toggle"
+              onClick={toggleDropdown}
+              aria-label="Toggle Menu">
+              <i className="fa fa-bars" aria-hidden="true"></i>
+            </button>
+            {menuOpen && (
+              <div className="dropdown-menu" ref={dropdownRef}>
+                {/* // 👈 reference to detect outside clicks */}
+                <i className="fa fa-language" aria-hidden="true"></i>
+                <ThemeToggle />
+                <i className="fa fa-sign-in" aria-hidden="true"></i>
+              </div>
+            )}
+          </div>
+        </header>
       </div>
-    </header>
+    </div>
   );
 }
 
