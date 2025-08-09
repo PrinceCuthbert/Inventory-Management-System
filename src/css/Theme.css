@@ -23,6 +23,7 @@ body.dark {
   --btn-hover-bg: hsl(220, 91%, 70%);
   --btn-hover-bg-theme: hsl(210, 40%, 98%);
   --btn-hover-text: hsl(220, 84%, 4%);
+  --table-elt-hover: hsl(220deg 32.01% 16.26%);
 }
 
 body.light {

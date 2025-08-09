@@ -1,6 +1,7 @@
 import Header from "../pages/Header";
 import Sidebar from "../components/Sidebar"; // your actual sidebar
 import { useState, useEffect } from "react";
+import { Outlet } from "react-router-dom"; // 👈 TO Allow content to render in page-content
 import "../css/homepage.css";
 
 function HomePage() {
@@ -38,7 +39,8 @@ function HomePage() {
           isSidebarCollapsed={isSidebarCollapsed}
         />
         <div className="page-content">
-          <h2>Main content goes here</h2>
+          {/* <h2>Main content goes here</h2> */}
+          <Outlet /> {/* 👈 This is where each page will load */}
         </div>
       </div>
     </div>

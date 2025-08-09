@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "../css/sidebar.css";
 
 function Sidebar({ collapsed, visible, isMobile, toggleSidebar }) {
@@ -31,69 +32,69 @@ function Sidebar({ collapsed, visible, isMobile, toggleSidebar }) {
 
           <div className="nav-links">
             {!collapsed && <p className="nav-title">Navigation</p>}
-            <a href="#">
+            <Link to="/HomePage">
               <i className="fas fa-home active"></i>
               {!collapsed && <span>Dashboard</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="">
               <i className="fas fa-users"></i>
               {!collapsed && <span>Users</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="/HomePage/products">
               <i className="fas fa-cube"></i>
               {!collapsed && <span>Products</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="#">
               <i className="fas fa-folder-open"></i>
               {!collapsed && <span>Categories</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="#">
               <i className="fas fa-tag"></i>
               {!collapsed && <span>Brands</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="#">
               <i className="fas fa-ruler"></i>
               {!collapsed && <span>Sizes</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="#">
               <i className="fas fa-chart-bar"></i>
               {!collapsed && <span>Product Sizes</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="#">
               <i className="fas fa-cart-shopping"></i>
               {!collapsed && <span>Sales</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="#">
               <i className="fas fa-dollar-sign"></i>
               {!collapsed && <span>Expense Types</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="#">
               <i className="fas fa-wallet"></i>
               {!collapsed && <span>Expenses</span>}
-            </a>
+            </Link>
 
-            <a href="#">
+            <Link to="#">
               <i className="fas fa-truck"></i>{" "}
               {/* Use fa-truck instead of fa-truck-field */}
               {!collapsed && <span>Supplies</span>}
-            </a>
+            </Link>
           </div>
         </div>
         {/* Settings pushed to bottom */}
         <div className="settings-link">
-          <a href="#">
+          <Link to="#">
             <i className="fa fa-cog"></i>
             {!collapsed && <span>Settings</span>}
-          </a>
+          </Link>
         </div>
       </nav>
     </div>
