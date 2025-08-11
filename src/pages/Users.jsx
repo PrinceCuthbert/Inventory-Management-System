@@ -4,6 +4,8 @@ import "../css/users.css";
 // 1. Import your local static user data as fallback (simulate backend)
 // import { users as localUsers } from "../pages/users";
 import { users as localUsers } from "../data/users";
+import AddUserDialog from "./AddUserDialog";
+// ("./AddUserDialog");
 
 function Users() {
   // Modal & selected user
@@ -16,6 +18,9 @@ function Users() {
   // Users data + loading + error states
   const [users, setUsers] = useState([]); // Start with static users so UI renders immediately
   const [isLoading, setIsLoading] = useState(false); // no loading on static data
+
+  // For AddUserDialog Box
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false); // NEW
 
   useEffect(() => {
     // Simulate fetching data with a timeout
@@ -65,7 +70,7 @@ function Users() {
           <h1>Users</h1>
           <p>Manage system users</p>
         </div>
-        <button className="btn-primary">
+        <button className="btn-primary" onClick={() => setIsAddUserOpen(true)}>
           <i className="fa fa-plus"></i> Add User
         </button>
       </div>
@@ -174,6 +179,12 @@ function Users() {
           </div>
         </div>
       )}
+
+      {/* <div className="add-user"></div> */}
+      <AddUserDialog
+        isOpen={isAddUserOpen}
+        onClose={() => setIsAddUserOpen(false)}
+      />
     </div>
   );
 }

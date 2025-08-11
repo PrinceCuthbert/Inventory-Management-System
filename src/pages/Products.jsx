@@ -89,6 +89,9 @@ function Products() {
                 <th>Category</th>
                 <th>Brand</th>
                 <th>Tags</th>
+                <th>Supplier</th>
+                <th>Price(RWF)</th>
+                <th>Stock(Quantity)</th>
                 <th>Created</th>
                 <th>Actions</th>
               </tr>
@@ -119,6 +122,9 @@ function Products() {
                         ))}
                       </div>
                     </td>
+                    <td data-label="Supplier">{product.supplier}</td>
+                    <td data-label="Price">{product.price}</td>
+                    <td data-label="Stock">{product.stock}</td>
                     <td data-label="Created">{product.createdAt}</td>
                     <td data-label="Actions" className="actions-buttons-table">
                       <div className="action-buttons">
@@ -163,6 +169,15 @@ function Products() {
 
               <label>Brand:</label>
               <p>{selectedProduct.brand}</p>
+
+              <label>Supplier:</label>
+              <p>{selectedProduct.supplier}</p>
+
+              <label>Stock:</label>
+              <p>{selectedProduct.stock}</p>
+
+              <label>Price:</label>
+              <p>{selectedProduct.price}</p>
             </div>
             <button className="btn-close" onClick={() => setDialogOpen(false)}>
               Close
