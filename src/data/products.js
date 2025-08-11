@@ -1,0 +1,32 @@
+export const products = [
+  {
+    id: 1,
+    name: "iPhone 14 Pro",
+    slug: "iphone-14-pro",
+    category: "Electronics",
+    brand: "Apple",
+    description: "Latest iPhone with Pro camera system",
+    tags: ["smartphone", "apple", "premium"],
+    createdAt: "2024-01-15",
+  },
+  {
+    id: 2,
+    name: "Samsung Galaxy S23",
+    slug: "samsung-galaxy-s23",
+    category: "Electronics",
+    brand: "Samsung",
+    description: "Flagship Android smartphone",
+    tags: ["smartphone", "android", "samsung"],
+    createdAt: "2024-01-14",
+  },
+  {
+    id: 3,
+    name: "MacBook Pro M2",
+    slug: "macbook-pro-m2",
+    category: "Computers",
+    brand: "Apple",
+    description: "Professional laptop with M2 chip",
+    tags: ["laptop", "apple", "professional"],
+    createdAt: "2024-01-13",
+  },
+];

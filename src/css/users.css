@@ -282,6 +282,13 @@
   color: var(--btn-hover-text);
 }
 
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
 /* ===== Responsive styles ===== */
 @media (max-width: 768px) {
   /* Make header vertical and buttons full width */
@@ -368,41 +375,45 @@
 }
 
 @media (max-width: 480px) {
-  .user-header > .btn-primary {
-    font-size: 0.9rem;
-    width: 50%;
-  }
-  /* Ensure the TD with actions label has proper padding */
+  /* Actions cell */
   td[data-label="Actions"] {
-    padding-left: 1rem; /* space for label */
-    padding-top: 2.25rem; /* push buttons below label */
+    padding-left: 1rem;
+    padding-top: 2.25rem;
     position: relative;
+    max-width: 100%;
+    overflow: visible;
   }
 
-  /* Make the label (data-label) always visible at top-left */
-  td[data-label="Actions"]::before {
-    position: absolute;
-    top: 0.5rem;
-    left: 1rem;
-    white-space: nowrap;
-    font-weight: 600;
-    color: var(--btn-text);
-    text-transform: uppercase;
-    font-size: 0.75rem;
-  }
-
-  /* Stack buttons vertically inside action-buttons */
   .action-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    width: 50%;
+    flex-direction: row;
+    gap: 0.5rem;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
 
-  /* Make buttons fill the width inside the container */
   .btn-icon {
-    width: 100%; /* full width */
-    justify-content: center; /* center icon inside */
-    padding-left: 0; /* reset padding */
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+    padding-left: 0;
+  }
+
+  /* Contact cell */
+  td[data-label="Contact"] {
+    max-width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    text-align: left;
+    padding-left: 1rem;
+  }
+
+  /* Row padding */
+  .user-table tbody tr {
+    padding: 1rem 1rem 1rem 2rem;
   }
 }

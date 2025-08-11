@@ -1,46 +1,36 @@
 import { useState, useRef, useEffect } from "react";
-import "../css/products.css"; // create this for styles
+import "../css/products.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+
+// Import local static products data
+// import { products as localProducts } from "../pages/products";
+import { products as localProducts } from "../data/products";
 
 function Products() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const dialogRef = useRef(null);
 
-  const products = [
-    {
-      id: 1,
-      name: "iPhone 14 Pro",
-      slug: "iphone-14-pro",
-      category: "Electronics",
-      brand: "Apple",
-      description: "Latest iPhone with Pro camera system",
-      tags: ["smartphone", "apple", "premium"],
-      createdAt: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Samsung Galaxy S23",
-      slug: "samsung-galaxy-s23",
-      category: "Electronics",
-      brand: "Samsung",
-      description: "Flagship Android smartphone",
-      tags: ["smartphone", "android", "samsung"],
-      createdAt: "2024-01-14",
-    },
-    {
-      id: 3,
-      name: "MacBook Pro M2",
-      slug: "macbook-pro-m2",
-      category: "Computers",
-      brand: "Apple",
-      description: "Professional laptop with M2 chip",
-      tags: ["laptop", "apple", "professional"],
-      createdAt: "2024-01-13",
-    },
-  ];
+  useEffect(() => {
+    // Simulate backend fetch with timeout for now
+    const fetchProducts = () => {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(localProducts), 500);
+      });
+    };
 
+    fetchProducts()
+      .then((data) => {
+        setProducts(data);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
+  }, []);
+
+  // Filter products by search term
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,60 +77,74 @@ function Products() {
         />
       </div>
 
-      {/* Table */}
-      <div className="products-table-wrapper">
-        <table className="products-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Brand</th>
-              <th>Tags</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProducts.map((product) => (
-              <tr key={product.id}>
-                <td data-label="Name" className="bold">
-                  {product.name}
-                </td>
-                <td data-label="Category">{product.category}</td>
-                <td data-label="Brand">{product.brand}</td>
-                <td data-label="Tags">
-                  <div className="tag-container">
-                    {product.tags.map((tag) => (
-                      <span className="tag" key={tag}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td data-label="Created">{product.createdAt}</td>
-                <td data-label="Actions" className="actions-buttons-table">
-                  <div className="action-buttons">
-                    <button
-                      className="btn-icon"
-                      onClick={() => {
-                        setSelectedProduct(product);
-                        setDialogOpen(true);
-                      }}>
-                      <i className="fa fa-eye"></i>
-                    </button>
-                    <button className="btn-icon">
-                      <i className="fa fa-edit"></i>
-                    </button>
-                    <button className="btn-icon delete">
-                      <i className="fa fa-trash"></i>
-                    </button>
-                  </div>
-                </td>
+      {/* Loading state */}
+      {isLoading ? (
+        <p>Loading products...</p>
+      ) : (
+        <div className="products-table-wrapper">
+          <table className="products-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Brand</th>
+                <th>Tags</th>
+                <th>Created</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    style={{ textAlign: "center", padding: "20px" }}>
+                    No products found
+                  </td>
+                </tr>
+              ) : (
+                filteredProducts.map((product) => (
+                  <tr key={product.id}>
+                    <td data-label="Name" className="bold">
+                      {product.name}
+                    </td>
+                    <td data-label="Category">{product.category}</td>
+                    <td data-label="Brand">{product.brand}</td>
+                    <td data-label="Tags">
+                      <div className="tag-container">
+                        {product.tags.map((tag) => (
+                          <span className="tag" key={tag}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td data-label="Created">{product.createdAt}</td>
+                    <td data-label="Actions" className="actions-buttons-table">
+                      <div className="action-buttons">
+                        <button
+                          className="btn-icon"
+                          onClick={() => {
+                            setSelectedProduct(product);
+                            setDialogOpen(true);
+                          }}>
+                          <i className="fa fa-eye"></i>
+                        </button>
+                        <button className="btn-icon">
+                          <i className="fa fa-edit"></i>
+                        </button>
+                        <button className="btn-icon delete">
+                          <i className="fa fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Dialog */}
       {dialogOpen && selectedProduct && (

@@ -1,68 +1,65 @@
-import { React, useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../css/users.css";
 
-// import { data } from "../pages/data.js";
-import { users } from "../pages/users.js";
+// 1. Import your local static user data as fallback (simulate backend)
+// import { users as localUsers } from "../pages/users";
+import { users as localUsers } from "../data/users";
 
 function Users() {
-  // console.log(data);
-  // const [search, setSearch] = useState("");
-  // console.log(search);
-  // return (
-  //   <>
-  //     <div>
-  //       <h1>Contact Keeper</h1>
-  //       <input
-  //         type="text"
-  //         placeholder="Search contacts"
-  //         onChange={(e) => setSearch(e.target.value)}
-  //       />
-  //       <div>
-  //         <table>
-  //           <thead>
-  //             <tr>
-  //               <th>First Name</th>
-  //               <th>Last Name</th>
-  //               <th>Email</th>
-  //               <th>Phone</th>
-  //             </tr>
-  //           </thead>
-  //           <tbody>
-  //             {data
-  //               .filter((item) => {
-  //                 const query = search.toLowerCase();
-  //                 return (
-  //                   query === "" ||
-  //                   item.first_name.toLowerCase().includes(query) ||
-  //                   item.last_name.toLowerCase().includes(query) ||
-  //                   item.email.toLowerCase().includes(query) ||
-  //                   item.phone.toLowerCase().includes(query)
-  //                 );
-  //               })
-  //               .map((item) => {
-  //                 return (
-  //                   <tr key={item.id}>
-  //                     <td>{item.first_name}</td>
-  //                     <td>{item.last_name}</td>
-  //                     <td>{item.email}</td>
-  //                     <td>{item.phone}</td>
-  //                   </tr>
-  //                 );
-  //               })}
-  //           </tbody>
-  //         </table>
-  //       </div>
-  //     </div>
-  //   </>
-  // );
+  // Modal & selected user
+  const [detailsModal, setDetailsModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
+  // Search term
   const [searchTerm, setSearchTerm] = useState("");
 
-  console.log(searchTerm);
+  // Users data + loading + error states
+  const [users, setUsers] = useState([]); // Start with static users so UI renders immediately
+  const [isLoading, setIsLoading] = useState(false); // no loading on static data
+
+  useEffect(() => {
+    // Simulate fetching data with a timeout
+    const fetchUsers = () => {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(localUsers), 500); // simulate 500ms delay
+      });
+    };
+
+    fetchUsers()
+      .then((data) => {
+        setUsers(data);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
+  }, []);
+
+  // Open user details modal
+  const openDetails = (user) => {
+    setSelectedUser(user);
+    setDetailsModal(true);
+  };
+
+  // Close modal
+  const closeDetails = () => {
+    setSelectedUser(null);
+    setDetailsModal(false);
+  };
+
+  // Filter users by search
+  const filteredUsers = users.filter((user) => {
+    const query = searchTerm.toLowerCase();
+    return (
+      query === "" ||
+      user.name.toLowerCase().includes(query) ||
+      user.username.toLowerCase().includes(query) ||
+      user.contact.toLowerCase().includes(query) ||
+      user.role.toLowerCase().includes(query) ||
+      user.created_at.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <div className="user-container">
-      {/* Header */}
       <div className="user-header">
         <div>
           <h1>Users</h1>
@@ -72,85 +69,111 @@ function Users() {
           <i className="fa fa-plus"></i> Add User
         </button>
       </div>
-      {/* Search */}
+
       <div className="user-search">
         <i className="fa fa-search"></i>
         <input
           type="text"
           placeholder="Search users..."
-          value=""
+          value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      {/* Table */}
-      <div className="user-table-wrapper">
-        <table className="user-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Username</th>
-              <th>Contact</th>
-              <th>Role</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((users) => (
-              <tr key={users.name}>
-                <td data-label="Name" className="bold">
-                  {users.name}
-                </td>
-                <td data-label="Username">{users.username}</td>
-                <td data-label="Contact">{users.contact}</td>
-                <td data-label="Role">
-                  <div className="role-container">
-                    <span className="role">{users.role}</span>
-                  </div>
-                </td>
-                <td data-label="Created At">{users.created_at}</td>
-                <td data-label="Actions" className="actions-buttons-table">
-                  <div className="action-buttons">
-                    <button className="btn-icon">
-                      <i className="fa fa-eye"></i>
-                    </button>
-                    <button className="btn-icon">
-                      <i className="fa fa-edit"></i>
-                    </button>
-                    <button className="btn-icon delete">
-                      <i className="fa fa-trash"></i>
-                    </button>
-                  </div>
-                </td>
+
+      {/* {isLoading && <p>Loading users...</p>}
+      {error && <p style={{ color: "red" }}>Error: {error}</p>} */}
+
+      {!isLoading && (
+        <div className="user-table-wrapper">
+          <table className="user-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Contact</th>
+                <th>Role</th>
+                <th>Created</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Dialog */}
-
-      {/* <div className="dialog-overlay">
-        <div className="dialog-box">
-          <h3>User Details</h3>
-          <div className="dialog-content">
-            <label>Name:</label>
-            <p>Admin User</p>
-
-            <label>Username</label>
-            <p>admin</p>
-
-            <label>Contact</label>
-            <p>+250798865434</p>
-
-            <label>Role</label>
-            <p>Admin</p>
-            <label>Created-at</label>
-            <p>1/15/2025</p>
-          </div>
-          <button className="btn-close">Close</button>
+            </thead>
+            <tbody>
+              {filteredUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    style={{ textAlign: "center", padding: "20px" }}>
+                    No user Found
+                  </td>
+                </tr>
+              ) : (
+                filteredUsers.map((user) => (
+                  <tr key={user.name}>
+                    <td data-label="Name" className="bold">
+                      {user.name}
+                    </td>
+                    <td data-label="Username">{user.username}</td>
+                    <td data-label="Contact">{user.contact}</td>
+                    <td data-label="Role">
+                      <div className="role-container">
+                        <span className="role">{user.role}</span>
+                      </div>
+                    </td>
+                    <td data-label="Created At">{user.created_at}</td>
+                    <td data-label="Actions" className="actions-buttons-table">
+                      <div className="action-buttons">
+                        <button
+                          className="btn-icon"
+                          onClick={() => openDetails(user)}
+                          aria-label={`View details of ${user.name}`}>
+                          <i className="fa fa-eye"></i>
+                        </button>
+                        <button
+                          className="btn-icon"
+                          aria-label={`Edit ${user.name}`}>
+                          <i className="fa fa-edit"></i>
+                        </button>
+                        <button
+                          className="btn-icon delete"
+                          aria-label={`Delete ${user.name}`}>
+                          <i className="fa fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      </div> */}
+      )}
+
+      {/* User details modal */}
+      {detailsModal && selectedUser && (
+        <div className="dialog-overlay" onClick={closeDetails}>
+          <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
+            <h3>User Details</h3>
+            <div className="dialog-content">
+              <label>Name:</label>
+              <p>{selectedUser.name}</p>
+
+              <label>Username</label>
+              <p>{selectedUser.username}</p>
+
+              <label>Contact</label>
+              <p>{selectedUser.contact}</p>
+
+              <label>Role</label>
+              <p>{selectedUser.role}</p>
+
+              <label>Created At</label>
+              <p>{selectedUser.created_at}</p>
+            </div>
+            <button className="btn-close" onClick={closeDetails}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
