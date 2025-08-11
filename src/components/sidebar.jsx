@@ -37,7 +37,7 @@ function Sidebar({ collapsed, visible, isMobile, toggleSidebar }) {
               {!collapsed && <span>Dashboard</span>}
             </Link>
 
-            <Link to="">
+            <Link to="/HomePage/users">
               <i className="fas fa-users"></i>
               {!collapsed && <span>Users</span>}
             </Link>

@@ -2,6 +2,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import Products from "./pages/Products";
+import Users from "./pages/Users";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route index element={<h2>Welcome Dashboard</h2>} />
 
         {/* This will render inside <Outlet /> */}
+        <Route path="users" element={<Users />} />
         <Route path="products" element={<Products />} />
       </Route>
     </Routes>
