@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import Products from "./pages/Products";
 import Users from "./pages/Users";
+import Categories from "./pages/Categories";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         {/* This will render inside <Outlet /> */}
         <Route path="users" element={<Users />} />
         <Route path="products" element={<Products />} />
+        <Route path="categories" element={<Categories />} />
       </Route>
     </Routes>
   );

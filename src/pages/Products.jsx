@@ -35,7 +35,13 @@ function Products() {
     (p) =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.brand.toLowerCase().includes(searchTerm.toLowerCase())
+      p.tags.some((tag) =>
+        tag.toLowerCase().includes(searchTerm.toLowerCase())
+      ) ||
+      p.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.price.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.stock.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.createdAt.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Close dialog if clicked outside
@@ -161,8 +167,8 @@ function Products() {
               <label>Name:</label>
               <p>{selectedProduct.name}</p>
 
-              <label>Description:</label>
-              <p>{selectedProduct.description}</p>
+              {/* <label>Description:</label>
+              <p>{selectedProduct.description}</p> */}
 
               <label>Category:</label>
               <p>{selectedProduct.category}</p>

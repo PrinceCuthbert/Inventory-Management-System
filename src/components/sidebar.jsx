@@ -47,7 +47,7 @@ function Sidebar({ collapsed, visible, isMobile, toggleSidebar }) {
               {!collapsed && <span>Products</span>}
             </Link>
 
-            <Link to="#">
+            <Link to="/HomePage/categories">
               <i className="fas fa-folder-open"></i>
               {!collapsed && <span>Categories</span>}
             </Link>
