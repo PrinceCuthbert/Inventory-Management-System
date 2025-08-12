@@ -4,7 +4,7 @@ import "../css/users.css";
 // 1. Import your local static user data as fallback (simulate backend)
 // import { users as localUsers } from "../pages/users";
 import { users as localUsers } from "../data/users";
-import AddUserDialog from "./AddUserDialog";
+import AddUserDialog from "./AddingPages/AddUserDialog";
 // ("./AddUserDialog");
 
 function Users() {
@@ -87,6 +87,12 @@ function Users() {
 
       {/* {isLoading && <p>Loading users...</p>}
       {error && <p style={{ color: "red" }}>Error: {error}</p>} */}
+
+      {/* <td
+                  colSpan="6"
+                  style={{ textAlign: "center", padding: "20px" }}>
+                  No user Found
+                </td> */}
 
       {!isLoading && (
         <div className="user-table-wrapper">

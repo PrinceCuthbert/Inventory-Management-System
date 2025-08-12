@@ -15,19 +15,21 @@ function Products() {
   const dialogRef = useRef(null);
 
   useEffect(() => {
-    // Simulate backend fetch with timeout for now
-    const fetchProducts = () => {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(localProducts), 500);
-      });
+    const fetchProducts = async () => {
+      try {
+        // Simulate backend fetch with timeout
+        const data = await new Promise((resolve) => {
+          setTimeout(() => resolve(localProducts), 500);
+        });
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    fetchProducts()
-      .then((data) => {
-        setProducts(data);
-        setIsLoading(false);
-      })
-      .catch(() => setIsLoading(false));
+    fetchProducts();
   }, []);
 
   // Filter products by search term
