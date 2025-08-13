@@ -168,6 +168,12 @@
   color: var(--btn-hover-text);
 }
 
+/* In your users.css */
+.admin-role-btn {
+  background-color: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
+}
+
 /* Action buttons */
 .action-buttons {
   display: flex;

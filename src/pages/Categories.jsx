@@ -1,6 +1,7 @@
 import { useState, useEffect, React } from "react";
 import "../css/users.css";
 import { categories as localCategories } from "../data/categories";
+import Spinner from "../components/antDesign/spin";
 
 function Categories() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,7 +51,9 @@ function Categories() {
         </div>
 
         {isLoading ? (
-          <p> Loading Categories..</p>
+          <Spinner />
+        ) : filteredCategory.length === 0 ? (
+          <p style={{ textAlign: "center", padding: "20px" }}>No data found</p>
         ) : (
           <div className="user-table-wrapper">
             <table className="user-table">

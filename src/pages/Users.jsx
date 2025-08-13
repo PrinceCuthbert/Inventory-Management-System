@@ -4,7 +4,9 @@ import "../css/users.css";
 // 1. Import your local static user data as fallback (simulate backend)
 // import { users as localUsers } from "../pages/users";
 import { users as localUsers } from "../data/users";
+import Spinner from "../components/antDesign/spin";
 import AddUserDialog from "./AddingPages/AddUserDialog";
+
 // ("./AddUserDialog");
 
 function Users() {
@@ -17,26 +19,28 @@ function Users() {
 
   // Users data + loading + error states
   const [users, setUsers] = useState([]); // Start with static users so UI renders immediately
-  const [isLoading, setIsLoading] = useState(false); // no loading on static data
+  const [isLoading, setIsLoading] = useState(true); // no loading on static data
 
   // For AddUserDialog Box
   const [isAddUserOpen, setIsAddUserOpen] = useState(false); // NEW
 
   useEffect(() => {
-    // Simulate fetching data with a timeout
-    const fetchUsers = () => {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(localUsers), 500); // simulate 500ms delay
-      });
-    };
-
-    fetchUsers()
-      .then((data) => {
+    const fetchUsers = async () => {
+      // setIsLoading(true);
+      // start loading
+      try {
+        const data = await new Promise((resolve) => {
+          setTimeout(() => resolve(localUsers), 500);
+        });
         setUsers(data);
-        setIsLoading(false);
-      })
-      .catch(() => setIsLoading(false));
-  }, []);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setIsLoading(false); // stop loading
+      }
+    };
+    fetchUsers();
+  }, []); // runs once
 
   // Open user details modal
   const openDetails = (user) => {
@@ -62,6 +66,13 @@ function Users() {
       user.created_at.toLowerCase().includes(query)
     );
   });
+
+  // Delete user function
+  const handleDeleteUser = (username) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      setUsers((prevUsers) => prevUsers.filter((u) => u.username !== username));
+    }
+  };
 
   return (
     <div className="user-container">
@@ -94,7 +105,11 @@ function Users() {
                   No user Found
                 </td> */}
 
-      {!isLoading && (
+      {isLoading ? (
+        <Spinner />
+      ) : filteredUsers.length === 0 ? (
+        <p style={{ textAlign: "center", padding: "20px" }}>No data found</p>
+      ) : (
         <div className="user-table-wrapper">
           <table className="user-table">
             <thead>
@@ -118,7 +133,7 @@ function Users() {
                 </tr>
               ) : (
                 filteredUsers.map((user) => (
-                  <tr key={user.name}>
+                  <tr key={user.id}>
                     <td data-label="Name" className="bold">
                       {user.name}
                     </td>
@@ -126,7 +141,14 @@ function Users() {
                     <td data-label="Contact">{user.contact}</td>
                     <td data-label="Role">
                       <div className="role-container">
-                        <span className="role">{user.role}</span>
+                        <span
+                          className={`role ${
+                            user.role.toLowerCase() === "admin"
+                              ? "admin-role-btn"
+                              : ""
+                          }`}>
+                          {user.role}
+                        </span>
                       </div>
                     </td>
                     <td data-label="Created At">{user.created_at}</td>
@@ -145,7 +167,8 @@ function Users() {
                         </button>
                         <button
                           className="btn-icon delete"
-                          aria-label={`Delete ${user.name}`}>
+                          aria-label={`Delete ${user.name}`}
+                          onClick={() => handleDeleteUser(user.username)}>
                           <i className="fa fa-trash"></i>
                         </button>
                       </div>
@@ -190,6 +213,15 @@ function Users() {
       <AddUserDialog
         isOpen={isAddUserOpen}
         onClose={() => setIsAddUserOpen(false)}
+        onAddUser={(newUser) => {
+          setUsers((prevUsers) => [
+            ...prevUsers,
+            {
+              ...newUser,
+              created_at: new Date().toLocaleDateString(), // auto-set creation date
+            },
+          ]);
+        }}
       />
     </div>
   );
