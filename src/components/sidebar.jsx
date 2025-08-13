@@ -32,7 +32,7 @@ function Sidebar({ collapsed, visible, isMobile, toggleSidebar }) {
 
           <div className="nav-links">
             {!collapsed && <p className="nav-title">Navigation</p>}
-            <Link to="/HomePage">
+            <Link to="/HomePage/dashboard">
               <i className="fas fa-home active"></i>
               {!collapsed && <span>Dashboard</span>}
             </Link>

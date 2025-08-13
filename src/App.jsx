@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import Products from "./pages/Products";
 import Users from "./pages/Users";
 import Categories from "./pages/Categories";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
       {/* Layout route */}
       <Route path="/HomePage" element={<HomePage />}>
         {/* Default page in Outlet */}
-        <Route index element={<h2>Welcome Dashboard</h2>} />
+        <Route path="dashboard" element={<Dashboard />} />
 
         {/* This will render inside <Outlet /> */}
         <Route path="users" element={<Users />} />
