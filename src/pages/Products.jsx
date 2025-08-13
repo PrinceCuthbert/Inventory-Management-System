@@ -20,35 +20,43 @@ function Products() {
   // For AddProductDialog Box
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
-  // useEffect(() => {
-  //   const fetchProducts = async () => {
-  //     try {
-  //       // Simulate backend fetch with timeout
-  //       const data = await new Promise((resolve) => {
-  //         setTimeout(() => resolve(localProducts), 500);
-  //       });
-  //       setProducts(data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch products:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchProducts();
-  // }, []);
-
   // Filter products by search term
 
   // Load products from localStorage or fallback to localProducts
+  // useEffect(() => {
+  //   const storedProducts = localStorage.getItem("products");
+  //   if (storedProducts) {
+  //     setProducts(JSON.parse(storedProducts));
+  //   } else {
+  //     setProducts(localProducts);
+  //   }
+  //   setIsLoading(false);
+  // }, []);
+
   useEffect(() => {
-    const storedProducts = localStorage.getItem("products");
-    if (storedProducts) {
-      setProducts(JSON.parse(storedProducts));
-    } else {
-      setProducts(localProducts);
-    }
-    setIsLoading(false);
+    const fetchProducts = async () => {
+      setIsLoading(true); // start loading
+      try {
+        const data = await new Promise((resolve) => {
+          setTimeout(() => {
+            const storedProducts = localStorage.getItem("products");
+            if (storedProducts) {
+              resolve(JSON.parse(storedProducts));
+            } else {
+              resolve(localProducts);
+            }
+          }, 500);
+        });
+
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setIsLoading(false); // stop loading
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   // When adding a product:
