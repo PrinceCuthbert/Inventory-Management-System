@@ -1,0 +1,73 @@
+/* src/css/dashboard.css */
+
+.dashboard-container {
+  padding: 20px;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  color: var(--text-color);
+}
+
+.dashboard-container h2 {
+  margin-bottom: 20px;
+  color: var(--text-color);
+  font-size: 1.8rem;
+}
+
+/* Grid layout for charts */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Individual chart cards */
+.chart-card {
+  background-color: var(--card-bg);
+  color: var(--card-text);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Make chart canvas responsive */
+.chart-card canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+
+  .dashboard-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .chart-grid {
+    grid-template-columns: 1fr; /* Stack charts vertically */
+    gap: 15px;
+  }
+
+  .chart-card {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container h2 {
+    font-size: 1.3rem;
+  }
+
+  .chart-card {
+    padding: 8px;
+  }
+}

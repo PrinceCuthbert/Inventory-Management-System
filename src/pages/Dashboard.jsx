@@ -1,19 +1,30 @@
-import { React } from "react";
+// src/pages/Dashboard.jsx
+import React from "react";
+import StockChart from "../components/chartjs/StockChart";
+import CategoryChart from "../components/chartjs//CategoryChart";
+import StockRadarChart from "../components/chartjs/StockRadarChart";
+import StockDoughnutChart from "../components/chartjs/StockDoughnutChart";
 
-import StockChart from "@/components/chartjs/StockChart";
-import CategoryChart from "@/components/chartjs/CategoryChart";
 import { products } from "../data/products";
+import "../css/dashboard.css";
 
 const Dashboard = () => {
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Inventory Dashboard</h2>
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-        <div style={{ flex: 1, minWidth: "400px" }}>
+    <div className="dashboard-container">
+      <h2>📊 Inventory Analytics</h2>
+
+      <div className="chart-grid">
+        <div className="chart-card">
           <StockChart products={products} />
         </div>
-        <div style={{ flex: 1, minWidth: "400px" }}>
+        <div className="chart-card">
           <CategoryChart products={products} />
+        </div>
+        {/* <div className="chart-card">
+          <StockRadarChart products={products} />
+        </div> */}
+        <div className="chart-card">
+          <StockDoughnutChart products={products} />
         </div>
       </div>
     </div>
