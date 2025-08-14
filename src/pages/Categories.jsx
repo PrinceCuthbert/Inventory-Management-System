@@ -2,11 +2,14 @@ import { useState, useEffect, React } from "react";
 import "../css/users.css";
 import { categories as localCategories } from "../data/categories";
 import Spinner from "../components/antDesign/spin";
+import AddCategoryDialog from "./AddingPages/AddCategoryDialog";
 
 function Categories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -29,7 +32,7 @@ function Categories() {
     (c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.createdAt.toLowerCase().includes(searchTerm())
+      c.createdAt.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -47,7 +50,12 @@ function Categories() {
 
         <div className="user-search">
           <i className="fa fa-search"></i>
-          <input type="text" placeholder="Search categories..." value="" />
+          <input
+            type="text"
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
         {isLoading ? (
@@ -68,68 +76,72 @@ function Categories() {
                 </tr>
               </thead>
               <tbody>
-                {localCategories.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="6"
-                      style={{ textAlign: "center", padding: "20px" }}>
-                      No Category Found
+                {filteredCategory.map((category) => (
+                  <tr key={category.id}>
+                    <td data-label="Name" className="bold">
+                      {category.name}
+                    </td>{" "}
+                    <td data-label="Description" className="bold">
+                      {category.description}
+                    </td>{" "}
+                    <td data-label="Created_at" className="bold">
+                      {category.createdAt}
+                    </td>
+                    <td data-label="Actions" className="actions-buttons-table">
+                      <div className="action-buttons">
+                        <button
+                          className="btn-icon"
+                          onClick={() => {
+                            setSelectedCategory(category);
+                            setDialogOpen(true);
+                          }}
+                          aria-label={`View details of ${category.name}`}>
+                          <i className="fa fa-eye"></i>
+                        </button>
+                        <button className="btn-icon">
+                          <i
+                            className="fa fa-edit"
+                            aria-label={`Edit ${category.name}`}></i>
+                        </button>
+                        <button className="btn-icon delete">
+                          <i className="fa fa-trash"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ) : (
-                  localCategories.map((category) => (
-                    <tr key={category.id}>
-                      <td data-label="Name" className="bold">
-                        {category.name}
-                      </td>
-                      <td data-label="Username">{category.description}</td>
-
-                      <td data-label="Created At">{category.createdAt}</td>
-                      <td
-                        data-label="Actions"
-                        className="actions-buttons-table">
-                        <div className="action-buttons">
-                          <button className="btn-icon" aria-label="View">
-                            <i className="fa fa-eye"></i>
-                          </button>
-                          <button className="btn-icon" aria-label={`Edit `}>
-                            <i className="fa fa-edit"></i>
-                          </button>
-                          <button className="btn-icon delete" aria-label="">
-                            <i className="fa fa-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         )}
 
-        {/* <div className="dialog-overlay">
-          <div className="dialog-box">
-            <h3>User Details</h3>
-            <div className="dialog-content">
-              <label>Name:</label>
-              <p>Hii</p>
+        {dialogOpen && selectedCategory && (
+          <div className="dialog-overlay">
+            <div className="dialog-box">
+              <h3>Category Details</h3>
+              <div className="dialog-content">
+                <label>Name:</label>
+                <p>Electronics</p>
 
-              <label>Username</label>
-              <p>Hello</p>
+                <label>Description</label>
+                <p>Electronic devices and accessories</p>
 
-              <label>Contact</label>
-              <p>hii</p>
+                <label>Created-at</label>
+                <p>1/15/2024, 12:00:00 PM</p>
 
-              <label>Role</label>
-              <p>role</p>
-
-              <label>Created At</label>
-              <p>at</p>
+                <label>Role</label>
+                <p>role</p>
+              </div>
+              <button
+                className="btn-close"
+                onClick={() => setDialogOpen(false)}>
+                Close
+              </button>
             </div>
-            <button className="btn-close">Close</button>
           </div>
-        </div> */}
+        )}
+
+        {/* <AddCategoryDialog /> */}
       </div>
     </>
   );

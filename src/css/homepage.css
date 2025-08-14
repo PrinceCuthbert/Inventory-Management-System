@@ -38,7 +38,7 @@
   flex: 1;
   padding: 1rem;
   background-color: var(--card-bg);
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 /* Collapsed or mobile-hidden state */
@@ -75,6 +75,7 @@
   padding: 1rem;
   background-color: var(--card-bg);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Menu button in header for small screens */

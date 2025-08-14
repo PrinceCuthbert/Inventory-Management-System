@@ -4,6 +4,7 @@ import StockChart from "../components/chartjs/StockChart";
 import CategoryChart from "../components/chartjs//CategoryChart";
 import StockRadarChart from "../components/chartjs/StockRadarChart";
 import StockDoughnutChart from "../components/chartjs/StockDoughnutChart";
+import BarChart from "@/components/Recharts/BarCharts";
 
 import { products } from "../data/products";
 import "../css/dashboard.css";
@@ -25,6 +26,9 @@ const Dashboard = () => {
         </div> */}
         <div className="chart-card">
           <StockDoughnutChart products={products} />
+        </div>
+        <div className="chart-card">
+          <BarChart products={products} />
         </div>
       </div>
     </div>

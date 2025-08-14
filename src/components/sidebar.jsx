@@ -57,15 +57,15 @@ function Sidebar({ collapsed, visible, isMobile, toggleSidebar }) {
               {!collapsed && <span>Brands</span>}
             </Link>
 
-            <Link to="#">
-              <i className="fas fa-ruler"></i>
-              {!collapsed && <span>Sizes</span>}
-            </Link>
+            {/* <Link to="#"> */}
+            {/* <i className="fas fa-ruler"></i> */}
+            {/* {!collapsed && <span>Sizes</span>} */}
+            {/* </Link> */}
 
-            <Link to="#">
-              <i className="fas fa-chart-bar"></i>
-              {!collapsed && <span>Product Sizes</span>}
-            </Link>
+            {/* <Link to="#"> */}
+            {/* <i className="fas fa-chart-bar"></i> */}
+            {/* {!collapsed && <span>Product Sizes</span>} */}
+            {/* </Link> */}
 
             <Link to="#">
               <i className="fas fa-cart-shopping"></i>
