@@ -8,14 +8,38 @@ function Categories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // const [dialogOpen, setDialogOpen] = useState(false);
+  const [detailsModal, setDetailsModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  // For AddCategoryDialog Box
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+
   useEffect(() => {
+    // const fetchCategories = async () => {
+    //   try {
+    //     const data = await new Promise((resolve) => {
+    //       setTimeout(() => resolve(localCategories), 500);
+    //     });
+    //     setCategories(data);
+    //   } catch (error) {
+    //     console.error("Failed to fetch categories:", error);
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
+
     const fetchCategories = async () => {
       try {
         const data = await new Promise((resolve) => {
-          setTimeout(() => resolve(localCategories), 500);
+          setTimeout(() => {
+            const stored = localStorage.getItem("categories");
+            if (stored) {
+              resolve(JSON.parse(stored));
+            } else {
+              resolve(localCategories);
+            }
+          }, 500);
         });
         setCategories(data);
       } catch (error) {
@@ -24,9 +48,23 @@ function Categories() {
         setIsLoading(false);
       }
     };
-
     fetchCategories();
   }, []);
+
+  // Add Category
+  const handleAddCategory = (newCategory) => {
+    setCategories((prev) => {
+      const updated = [
+        ...prev,
+        {
+          ...newCategory,
+          createdAt: new Date().toLocaleDateString(),
+        },
+      ];
+      localStorage.setItem("categories", JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   const filteredCategory = categories.filter(
     (c) =>
@@ -34,6 +72,18 @@ function Categories() {
       c.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.createdAt.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Open category details modal
+  const openDetails = (category) => {
+    setSelectedCategory(category);
+    setDetailsModal(true);
+  };
+
+  // Close modal
+  const closeDetails = () => {
+    setSelectedCategory(null);
+    setDetailsModal(false);
+  };
 
   return (
     <>
@@ -43,7 +93,9 @@ function Categories() {
             <h1>Categories</h1>
             <p>Manage system users</p>
           </div>
-          <button className="btn-primary">
+          <button
+            className="btn-primary"
+            onClick={() => setIsAddCategoryOpen(true)}>
             <i className="fa fa-plus"></i> Add Category
           </button>
         </div>
@@ -91,10 +143,7 @@ function Categories() {
                       <div className="action-buttons">
                         <button
                           className="btn-icon"
-                          onClick={() => {
-                            setSelectedCategory(category);
-                            setDialogOpen(true);
-                          }}
+                          onClick={() => openDetails(category)}
                           aria-label={`View details of ${category.name}`}>
                           <i className="fa fa-eye"></i>
                         </button>
@@ -115,33 +164,32 @@ function Categories() {
           </div>
         )}
 
-        {dialogOpen && selectedCategory && (
-          <div className="dialog-overlay">
-            <div className="dialog-box">
+        {detailsModal && selectedCategory && (
+          <div className="dialog-overlay" onClick={closeDetails}>
+            <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
               <h3>Category Details</h3>
               <div className="dialog-content">
                 <label>Name:</label>
-                <p>Electronics</p>
+                <p>{selectedCategory.name}</p>
 
                 <label>Description</label>
-                <p>Electronic devices and accessories</p>
+                <p>{selectedCategory.description}</p>
 
                 <label>Created-at</label>
-                <p>1/15/2024, 12:00:00 PM</p>
-
-                <label>Role</label>
-                <p>role</p>
+                <p>{selectedCategory.createdAt}</p>
               </div>
-              <button
-                className="btn-close"
-                onClick={() => setDialogOpen(false)}>
+              <button className="btn-close" onClick={closeDetails}>
                 Close
               </button>
             </div>
           </div>
         )}
 
-        {/* <AddCategoryDialog /> */}
+        <AddCategoryDialog
+          isOpen={isAddCategoryOpen}
+          onClose={() => setIsAddCategoryOpen(false)}
+          onAddCategory={handleAddCategory}
+        />
       </div>
     </>
   );
