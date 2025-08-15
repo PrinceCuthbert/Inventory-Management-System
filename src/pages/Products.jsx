@@ -17,6 +17,8 @@ function Products() {
   const [isLoading, setIsLoading] = useState(true);
   const dialogRef = useRef(null);
 
+  const [isFocused, setIsFocused] = useState(false);
+
   // For AddProductDialog Box
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
@@ -132,10 +134,22 @@ function Products() {
       <div className="products-search">
         <i className="fa fa-search"></i>
         <input
+          style={{
+            outline: "none",
+            border: "none",
+            boxShadow: "none",
+            ...(isFocused && {
+              outline: "none",
+              border: "none",
+              boxShadow: "none",
+            }),
+          }}
           type="text"
           placeholder="Search products..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
       </div>
 

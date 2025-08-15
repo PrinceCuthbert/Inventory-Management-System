@@ -69,6 +69,7 @@
   padding: 0.3rem 0.5rem;
   /* background-color: var(--btn-bg); */
   background-color: inherit;
+  outline: none;
   color: var(--btn-text);
   transition: max-width 0.3s ease;
 }
@@ -85,12 +86,15 @@
   padding: 0.3rem;
   color: var(--text-color);
   font-size: 1rem;
-  outline-offset: 2px;
+  /* outline: none; */
+  outline-offset: none;
+}
+.user-search input:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
 }
 
-/*  */
-
-/*  */
 .user-search input::placeholder {
   color: var(--btn-border);
 }
