@@ -7,6 +7,7 @@ import { users as localUsers } from "../data/users";
 import Spinner from "../components/antDesign/spin";
 import AddUserDialog from "./AddingPages/AddUserDialog";
 import { Button, Space, notification } from "antd";
+import { useOutlet, useOutletContext } from "react-router-dom";
 
 // ("./AddUserDialog");
 
@@ -19,7 +20,8 @@ function Users() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Users data + loading + error states
-  const [users, setUsers] = useState([]); // Start with static users so UI renders immediately
+  const { users, setUsers } = useOutletContext();
+
   const [isLoading, setIsLoading] = useState(true); // no loading on static data
 
   // For AddUserDialog Box

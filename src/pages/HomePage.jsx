@@ -17,6 +17,14 @@ function HomePage() {
     JSON.parse(localStorage.getItem("sales") || "[]")
   );
 
+  const [expenses, setExpenses] = useState(
+    JSON.parse(localStorage.getItem("expenses") || "[]")
+  );
+
+  const [users, setUsers] = useState(
+    JSON.parse(localStorage.getItem("users") || "[]")
+  );
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -48,7 +56,18 @@ function HomePage() {
         />
         <div className="page-content">
           {/* <h2>Main content goes here</h2> */}
-          <Outlet context={{ products, setProducts, sales, setSales }} />
+          <Outlet
+            context={{
+              products,
+              setProducts,
+              sales,
+              setSales,
+              users,
+              setUsers,
+              expenses,
+              setExpenses,
+            }}
+          />
           {/* 👈 This is where each page will load */}
         </div>
       </div>

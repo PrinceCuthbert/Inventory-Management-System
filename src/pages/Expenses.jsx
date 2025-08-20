@@ -20,7 +20,8 @@ function Expenses() {
   const { expenseTypes = [] } = useOutletContext();
 
   // Expenses state
-  const [expenses, setExpenses] = useState([]);
+  // const [expenses, setExpenses] = useState([]);
+  const { expenses, setExpenses } = useOutletContext();
 
   // Antd notification instance
   const [api, contextHolder] = notification.useNotification();
