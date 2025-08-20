@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../../css/users.css";
+import { expenseTypes } from "@/data/expenseTypes";
 
 export default function AddExpenseTypeDialog({
   isOpen,
@@ -24,9 +25,16 @@ export default function AddExpenseTypeDialog({
     e.preventDefault();
 
     // Prepare expense type object
+    // const newExpenseType = {
+    //   ...formData,
+    //   regularAmount: `$${parseFloat(formData.regularAmount).toFixed(2)}`,
+    //   createdAt: new Date().toLocaleDateString(),
+    // };
     const newExpenseType = {
-      ...formData,
-      regularAmount: `$${parseFloat(formData.regularAmount).toFixed(2)}`,
+      // id: Date.now(),  It will be handled in ExpenseTypes.jsx
+      name: formData.name,
+      regularAmount: parseFloat(formData.regularAmount),
+      description: formData.description,
       createdAt: new Date().toLocaleDateString(),
     };
 

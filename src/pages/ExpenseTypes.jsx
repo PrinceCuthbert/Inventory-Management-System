@@ -45,9 +45,13 @@ function ExpenseTypes() {
   // Add Expense Type
   const handleAddExpenseType = (newExpenseType) => {
     setExpenseTypes((prev) => {
+      const nextId = prev.length
+        ? Math.max(...prev.map((et) => et.id || 0)) + 1
+        : 1;
       const updated = [
         ...prev,
         {
+          id: nextId,
           ...newExpenseType,
           createdAt: new Date().toLocaleDateString(),
         },
@@ -110,6 +114,8 @@ function ExpenseTypes() {
     setSelectedExpenseType(null);
     setDetailsModal(false);
   };
+
+  console.log("ExpenseTypes:", expenseTypes);
 
   return (
     <>
@@ -222,6 +228,7 @@ function ExpenseTypes() {
           isOpen={isAddExpenseTypeOpen}
           onClose={() => setIsAddExpenseTypeOpen(false)}
           onAddExpenseType={handleAddExpenseType}
+          expenseTypes={expenseTypes}
         />
       </div>
     </>

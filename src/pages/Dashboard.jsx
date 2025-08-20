@@ -10,7 +10,7 @@ import StatCard from "@/components/statCard";
 import { calculateProfit } from "@/utils/profitUtils";
 
 import { useNetProfit } from "@/hooks/useNetProfit";
-import { useExpenses } from "@/hooks/useExpenses"; // to pass expenses
+// import { useExpenses } from "@/hooks/useExpenses"; // to pass expenses
 
 import { useOutletContext } from "react-router-dom";
 
@@ -28,6 +28,8 @@ const Dashboard = () => {
     sales,
     products
   );
+
+  console.log("Expenses inside Dashboard:", expenses);
 
   // Net Profit
   const {
@@ -89,6 +91,7 @@ const Dashboard = () => {
     );
   }, [products]);
 
+  // console.log("Expenses:", expenses);
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Admin Dashboard</h1>
@@ -115,7 +118,6 @@ const Dashboard = () => {
           color="#4ade80"
           percentageColor="#10b981"
         />
-
         <StatCard
           title="Total Sales"
           value={salesThisMonth.length}
@@ -124,7 +126,6 @@ const Dashboard = () => {
           color="#c084fc"
           percentageColor="#10b981"
         />
-
         <StatCard
           title="Total Revenue"
           value={totalRevenue}
@@ -134,7 +135,6 @@ const Dashboard = () => {
           color="#fb923c"
           percentageColor="#10b981"
         />
-
         <StatCard
           title="Monthly Profit"
           value={monthlyProfit}
@@ -144,7 +144,6 @@ const Dashboard = () => {
           color="#34d399"
           percentageColor="#10b981"
         />
-
         <StatCard
           title="Stock Value"
           value={stockValue}
@@ -154,7 +153,6 @@ const Dashboard = () => {
           color="#818cf8"
           percentageColor="#10b981"
         />
-
         <StatCard
           title="Gross Profit"
           value={grossProfitDisplay}
@@ -163,7 +161,6 @@ const Dashboard = () => {
           color="#34d399"
           // percentageColor="#10b981"
         />
-
         {/* ✅ Net Profit Card */}
         <StatCard
           title={netProfitLabel}

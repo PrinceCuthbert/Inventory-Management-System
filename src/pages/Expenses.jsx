@@ -26,6 +26,8 @@ function Expenses() {
   // Antd notification instance
   const [api, contextHolder] = notification.useNotification();
 
+  console.log("Expenses inside Dashboard:", expenses);
+
   // Fetch expenses from localStorage or fallback to localExpenses
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -86,6 +88,7 @@ function Expenses() {
   // Add expense with persistence
   const handleAddExpense = (newExpense) => {
     setExpenses((prev) => {
+      // For auto incrementing the id(but works fine for only small local storage datasets)
       const nextId = prev.length ? Math.max(...prev.map((e) => e.id)) + 1 : 1;
       const updated = [
         ...prev,

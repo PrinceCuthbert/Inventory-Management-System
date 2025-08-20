@@ -21,6 +21,10 @@ function HomePage() {
     JSON.parse(localStorage.getItem("expenses") || "[]")
   );
 
+  const [expenseTypes, setExpenseTypes] = useState(
+    JSON.parse(localStorage.getItem("expenseTypes") || "[]")
+  );
+
   const [users, setUsers] = useState(
     JSON.parse(localStorage.getItem("users") || "[]")
   );
@@ -66,6 +70,8 @@ function HomePage() {
               setUsers,
               expenses,
               setExpenses,
+              expenseTypes,
+              setExpenseTypes,
             }}
           />
           {/* 👈 This is where each page will load */}

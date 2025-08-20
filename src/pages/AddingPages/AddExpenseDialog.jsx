@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../css/users.css";
 
 export default function AddExpenseDialog({
@@ -10,16 +10,36 @@ export default function AddExpenseDialog({
   const [formData, setFormData] = useState({
     payee: "",
     amount: "",
+    expenseTypeId: "",
     expenseType: "",
-    otherType: "",
     description: "",
   });
 
-  const [types, setTypes] = useState(() => {
-    // Try to get from localStorage
-    const stored = JSON.parse(localStorage.getItem("expenseTypes"));
-    return stored && stored.length ? stored : expenseTypes;
-  });
+  // ✅ Use expenseTypes from props and keep it up-to-date
+  const [types, setTypes] = useState(expenseTypes);
+
+  useEffect(() => {
+    if (!expenseTypes) return;
+
+    // Copy current expenseTypes
+    const updatedTypes = [...expenseTypes];
+
+    // Only add "Others" if not already present
+    if (!updatedTypes.find((t) => t.name === "Others")) {
+      const nextId = updatedTypes.length
+        ? Math.max(...updatedTypes.map((t) => t.id)) + 1
+        : 1;
+      updatedTypes.push({
+        id: nextId,
+        name: "Others",
+        regularAmount: 0,
+        description: "Fallback for uncategorized expenses",
+        createdAt: new Date().toLocaleDateString(),
+      });
+    }
+
+    setTypes(updatedTypes);
+  }, [expenseTypes]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,13 +52,15 @@ export default function AddExpenseDialog({
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Determine expenseTypeId
+    const selectedType = types.find((t) => t.id === formData.expenseTypeId);
+
     const newExpense = {
+      id: Date.now(), // simple unique id
       payee: formData.payee,
       amount: parseFloat(formData.amount),
-      expenseType:
-        formData.expenseType === "Other"
-          ? formData.otherType
-          : formData.expenseType,
+      expenseTypeId: selectedType?.id || null, // always set ID
+      expenseType: selectedType?.name || "Others", // store name
       description: formData.description,
       createdAt: new Date().toLocaleDateString(),
     };
@@ -49,13 +71,17 @@ export default function AddExpenseDialog({
     setFormData({
       payee: "",
       amount: "",
+      expenseTypeId: "",
       expenseType: "",
-      otherType: "",
       description: "",
     });
 
     onClose();
   };
+
+  useEffect(() => {
+    console.log("Types:", types);
+  }, [types]);
 
   if (!isOpen) return null;
 
@@ -93,31 +119,23 @@ export default function AddExpenseDialog({
             <div>
               <label>Expense Type</label>
               <select
-                name="expenseType"
-                value={formData.expenseType}
-                onChange={handleChange}
+                name="expenseTypeId"
+                value={formData.expenseTypeId || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    expenseTypeId: Number(e.target.value),
+                  }))
+                }
                 required>
                 <option value="">Select Expense Type</option>
-                {types.map((type, idx) => (
-                  <option key={idx} value={type.name}>
+                {types.map((type) => (
+                  <option key={type.id} value={type.id}>
                     {type.name}
                   </option>
                 ))}
-                <option value="Other">Other</option>
               </select>
             </div>
-
-            {formData.expenseType === "Other" && (
-              <div>
-                <label>Other Expense Type</label>
-                <input
-                  name="otherType"
-                  value={formData.otherType}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            )}
 
             <div>
               <label>Description</label>
