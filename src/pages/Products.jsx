@@ -21,11 +21,19 @@ function Products() {
   useEffect(() => {
     const stored = localStorage.getItem("products");
     if (stored) {
-      setProducts(JSON.parse(stored));
+      const parsed = JSON.parse(stored).map((p, index) => ({
+        ...p,
+        id: p.id || index + 1,
+      }));
+      setProducts(parsed);
     } else {
       import("../data/products").then(({ products }) => {
-        setProducts(products);
-        localStorage.setItem("products", JSON.stringify(products));
+        const normalized = products.map((p, index) => ({
+          ...p,
+          id: p.id || index + 1,
+        }));
+        setProducts(normalized);
+        localStorage.setItem("products", JSON.stringify(normalized));
       });
     }
   }, []);
@@ -59,11 +67,26 @@ function Products() {
   };
 
   const handleAddProduct = (newProduct) => {
+    const nextId = products.length
+      ? Math.max(...products.map((p) => p.id || 0)) + 1
+      : 1;
+
+    // const productWithId = { ...newProduct, id: nextId };
+    const productWithId = {
+      id: nextId,
+      name: newProduct.name,
+      category: newProduct.category.trim(),
+      brand: newProduct.brand.trim(),
+      tags: newProduct.tags || [],
+      supplier: newProduct.supplier.trim(),
+      costPrice: Number(newProduct.costPrice),
+      price: Number(newProduct.price),
+      stock: Number(newProduct.stock),
+      createdAt: new Date().toISOString().split("T")[0], // format: YYYY-MM-DD
+    };
+
     setProducts((prev) => {
-      const updated = [
-        ...prev,
-        { ...newProduct, createdAt: new Date().toLocaleDateString() },
-      ];
+      const updated = [...prev, productWithId];
       localStorage.setItem("products", JSON.stringify(updated));
       return updated;
     });
@@ -102,6 +125,9 @@ function Products() {
       duration: 0, // stays until user confirms/cancels
     });
   };
+
+  console.log("Products:", products);
+  console.log("Sales:", sales);
 
   return (
     <>

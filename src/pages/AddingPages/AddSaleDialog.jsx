@@ -16,7 +16,7 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
   const paymentMethods = ["CASH", "MOMO", "INSTALLMENTS", "LOAN"];
 
   useEffect(() => {
-    // Load products from localStorage
+    // ✅ Load products from localStorage once
     const storedProducts = JSON.parse(localStorage.getItem("products") || "[]");
     setProducts(storedProducts);
   }, []);
@@ -29,9 +29,9 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Find selected product object
+    // ✅ Find selected product
     const selectedProduct = products.find(
-      (p) => p.id === parseInt(formData.productId)
+      (p) => String(p.id) === String(formData.productId) // safer string comparison
     );
 
     if (!selectedProduct) {
@@ -39,15 +39,26 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
       return;
     }
 
-    // Validate quantity
+    // ✅ Validate quantity against stock
     const qty = parseInt(formData.quantity);
     if (qty > selectedProduct.stock) {
       alert(`Cannot sell more than available stock: ${selectedProduct.stock}`);
       return;
     }
 
+    // ✅ SAFER sale ID generator (saleCounter in localStorage)
+    // Get last used ID from localStorage
+    let saleCounter = Number(localStorage.getItem("saleCounter") || "0");
+
+    // Increment counter for new sale
+    saleCounter += 1;
+
+    // Save updated counter back to localStorage
+    localStorage.setItem("saleCounter", saleCounter);
+
+    // ✅ Build sale object
     const newSale = {
-      id: Date.now(),
+      id: saleCounter, // never reused, always increasing
       productId: selectedProduct.id,
       productName: selectedProduct.name,
       costPrice: selectedProduct.costPrice || 0,
@@ -60,9 +71,10 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
       createdAt: new Date().toLocaleDateString(),
     };
 
+    // ✅ Pass newSale to parent
     onAddSale(newSale);
 
-    // Reset form
+    // ✅ Reset form
     setFormData({
       productId: "",
       quantity: 1,
@@ -78,11 +90,10 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
 
   if (!isOpen) return null;
 
-  // Get selected product stock dynamically
+  // ✅ Dynamically check selected product to limit quantity dropdown
   const selectedProduct = products.find(
-    (p) => p.id === parseInt(formData.productId)
+    (p) => String(p.id) === String(formData.productId)
   );
-  const maxStock = selectedProduct?.stock || 0;
 
   return (
     <div className="popup-overlay">

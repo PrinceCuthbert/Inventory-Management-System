@@ -118,6 +118,9 @@ function Sales() {
     });
   };
 
+  console.log("Sales:", sales);
+  console.log("Products:", products);
+
   return (
     <>
       {contextHolder}
