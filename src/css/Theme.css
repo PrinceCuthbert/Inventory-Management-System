@@ -1,0 +1,75 @@
+:root {
+  /* Light theme variables from your Tailwind system */
+  --bg-color: hsl(0, 0%, 100%);
+  --text-color: hsl(220, 87%, 6%);
+  --card-bg: hsl(0, 0%, 100%);
+  --card-text: hsl(220, 87%, 6%);
+  --btn-bg: hsl(220, 14%, 96%);
+  --btn-text: hsl(220, 91%, 12%);
+  --btn-border: hsl(220, 13%, 91%);
+  --btn-hover-bg: hsl(220, 91%, 16%);
+  --btn-hover-text: hsl(210, 40%, 98%);
+}
+
+body.dark {
+  /* Dark theme variables from your .dark class */
+  --bg-color: hsl(220, 84%, 4%);
+  --text-color: hsl(210, 40%, 98%);
+  --text-blue: hsl(220, 20%, 65%);
+  --card-bg: hsl(220, 84%, 6%);
+  --card-text: hsl(210, 40%, 98%);
+  --btn-bg: hsl(220, 32%, 12%);
+  --btn-text: hsl(210, 40%, 98%);
+  --btn-border: hsl(220, 32%, 18%);
+  --btn-hover-bg: hsl(220, 91%, 70%);
+  --btn-hover-bg-theme: hsl(210, 40%, 98%);
+  --btn-hover-text: hsl(220, 84%, 4%);
+  --table-elt-hover: hsl(220deg 32.01% 16.26%);
+}
+
+body.light {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+body.dark {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+button {
+  margin: 1rem;
+  padding: 0.5rem 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  border: 2px solid var(--btn-border);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--btn-hover-bg-theme);
+  /* background-color: var(--bg-color); */
+  color: var(--btn-hover-text);
+}
+
+.theme-toggle-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--btn-text);
+}
+
+.theme-toggle-btn i {
+  /* border-color: var(--text-color); */
+  color: var(--text-color); /* Always match current theme */
+  transition: color 0.3s ease;
+}

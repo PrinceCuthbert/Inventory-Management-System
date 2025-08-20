@@ -1,0 +1,117 @@
+/* Make the entire page a horizontal flex container */
+.homepage-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Sidebar stays on the left */
+.sidebar {
+  width: 220px;
+  background-color: var(--card-bg);
+  border-right: 1px solid var(--btn-border);
+  transition: transform 0.3s ease;
+  z-index: 100;
+}
+
+/* Main content to the right of sidebar */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header stays on top */
+.topbar {
+  height: 60px;
+  background-color: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--btn-border);
+}
+
+/* Page content fills remaining space */
+.page-content {
+  flex: 1;
+  padding: 1rem;
+  background-color: var(--card-bg);
+  overflow-y: hidden;
+}
+
+/* Collapsed or mobile-hidden state */
+.sidebar.collapsed {
+  width: 60px;
+}
+
+/* Main content next to sidebar */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Top navigation/header */
+.topbar {
+  height: 60px;
+  background-color: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--btn-border);
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+/* Content area */
+.page-content {
+  flex: 1;
+  padding: 1rem;
+  background-color: var(--card-bg);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Menu button in header for small screens */
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  cursor: pointer;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    width: 220px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    background-color: var(--card-bg);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+
+  .main-content {
+    width: 100%;
+  }
+  .menu-btn {
+    display: inline-block;
+  }
+}

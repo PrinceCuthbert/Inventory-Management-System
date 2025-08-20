@@ -1,0 +1,106 @@
+.layout {
+  display: flex;
+  min-height: 5vh;
+  align-items: start;
+}
+
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: var(--card-bg);
+  color: var(--card-text);
+  border-bottom: 1px solid var(--btn-border);
+}
+
+.header-links {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 20rem;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+}
+
+.logo-icon {
+  font-size: 1.5rem;
+  color: var(--card-text);
+}
+
+.brand {
+  color: var(--text-blue);
+  font-size: 0.8rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-right: 5rem;
+}
+
+/* Hide desktop icons on small screens */
+.desktop-only {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* Dropdown button */
+.dropdown-toggle {
+  background: none;
+  border: none;
+  color: var(--card-text);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Dropdown menu on small screen */
+.dropdown-menu {
+  position: absolute;
+  top: 3.75rem;
+  right: 1rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--btn-border);
+  border-radius: 6px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0rem;
+  z-index: 1000;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .header-links {
+    flex: 1;
+    justify-content: space-between;
+    margin-right: 0;
+  }
+
+  .brand {
+    font-size: 0.9rem;
+  }
+}
