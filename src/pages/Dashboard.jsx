@@ -8,9 +8,11 @@ import StockDoughnutChart from "@/components/chartjs/StockDoughnutChart"; // Pay
 import "@/css/dashboard.css";
 import StatCard from "@/components/statCard";
 import { calculateProfit } from "@/utils/profitUtils";
+import { useProfit } from "@/hooks/useProfit";
 
 import { useNetProfit } from "@/hooks/useNetProfit";
-// import { useExpenses } from "@/hooks/useExpenses"; // to pass expenses
+import { useExpenses } from "@/hooks/useExpenses";
+// // to pass expenses
 
 import { useOutletContext } from "react-router-dom";
 
@@ -24,19 +26,26 @@ const Dashboard = () => {
   } = useOutletContext();
 
   // Gross Profit
-  const { profitLabel, displayAmount: grossProfitDisplay } = calculateProfit(
-    sales,
-    products
-  );
+  const {
+    displayAmount: grossProfitDisplay,
+    profitLabel,
+    totalProfit: grossProfit,
+  } = useProfit(sales, products);
+
+  const { total: totalExpenses } = useExpenses(expenses || []);
+  const netProfit = grossProfit - totalExpenses;
 
   console.log("Expenses inside Dashboard:", expenses);
 
   // Net Profit
-  const {
-    netProfit,
-    displayAmount: netProfitDisplay,
-    label: netProfitLabel,
-  } = useNetProfit(sales, products, expenses);
+  // const {
+  //   netProfit,
+  //   displayAmount: netProfitDisplay,
+  //   label: netProfitLabel,
+  // } = useNetProfit(sales, products, expenses);
+
+  const netProfitDisplay = Math.abs(netProfit).toFixed(2);
+  const netProfitLabel = netProfit >= 0 ? "Net Profit" : "Net Loss";
 
   // ✅ Dynamic stats
   const totalProducts = products.length;
@@ -91,7 +100,13 @@ const Dashboard = () => {
     );
   }, [products]);
 
-  // console.log("Expenses:", expenses);
+  // const { total: grossProfit } = useProfit(sales, products);
+  // const { total: totalExpenses } = useExpenses(expenses || []);
+
+  console.log("Gross Profit:", grossProfit);
+  console.log("Total Expenses:", totalExpenses);
+  console.log("Net Profit:", grossProfit - totalExpenses);
+
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Admin Dashboard</h1>
@@ -118,9 +133,17 @@ const Dashboard = () => {
           color="#4ade80"
           percentageColor="#10b981"
         />
-        <StatCard
+        {/* <StatCard
           title="Total Sales"
           value={salesThisMonth.length}
+          icon="fa-shopping-cart"
+          percentage="+3%"
+          color="#c084fc"
+          percentageColor="#10b981"
+        /> */}
+        <StatCard
+          title="Total Sales"
+          value={sales.length}
           icon="fa-shopping-cart"
           percentage="+3%"
           color="#c084fc"
@@ -154,20 +177,19 @@ const Dashboard = () => {
           percentageColor="#10b981"
         />
         <StatCard
-          title="Gross Profit"
+          title={profitLabel}
           value={grossProfitDisplay}
           currency="RWF "
           icon="fa-dollar-sign"
           color="#34d399"
-          // percentageColor="#10b981"
         />
         {/* ✅ Net Profit Card */}
         <StatCard
-          title={netProfitLabel}
-          value={netProfitDisplay}
+          title={netProfitLabel} // "Net Profit" or "Net Loss"
+          value={netProfitDisplay} // already formatted string
           currency="RWF "
           icon="fa-money-bill-wave"
-          color="#f97316"
+          color={netProfit >= 0 ? "#34d399" : "#f87171"} // green if profit, red if loss
         />
       </div>
 

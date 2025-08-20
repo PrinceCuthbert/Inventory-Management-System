@@ -5,7 +5,7 @@ import { useExpenses } from "./useExpenses"; // your expenses hook
 
 export function useNetProfit(sales, products, expenses) {
   const { total: grossProfit } = useProfit(sales, products);
-  const { total: totalExpenses } = useExpenses(expenses);
+  const { total: totalExpenses } = useExpenses(expenses || []);
 
   return useMemo(() => {
     const netProfit = grossProfit - totalExpenses;
