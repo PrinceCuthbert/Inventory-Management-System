@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom"; // 👈 TO Allow content to render in page-content
 import "../css/homepage.css";
 
+import { products as allProducts } from "@/data/products";
+
 function HomePage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -28,6 +30,57 @@ function HomePage() {
   const [users, setUsers] = useState(
     JSON.parse(localStorage.getItem("users") || "[]")
   );
+
+  // useEffect(() => {
+  //   const stored = JSON.parse(localStorage.getItem("products") || "null");
+  //   if (!stored || stored.length !== allProducts.length) {
+  //     localStorage.setItem("products", JSON.stringify(allProducts));
+  //     setProducts(allProducts);
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    // Merge products
+    const storedProducts = JSON.parse(localStorage.getItem("products") || "[]");
+    const mergedProducts = [...storedProducts];
+    allProducts.forEach((p) => {
+      if (!mergedProducts.find((sp) => sp.id === p.id)) mergedProducts.push(p);
+    });
+    setProducts(mergedProducts);
+    localStorage.setItem("products", JSON.stringify(mergedProducts));
+
+    // Merge sales
+    import("@/data/sales").then(({ salesData }) => {
+      const storedSales = JSON.parse(localStorage.getItem("sales") || "[]");
+      const mergedSales = [...storedSales];
+      salesData.forEach((s) => {
+        if (!mergedSales.find((ms) => ms.id === s.id)) mergedSales.push(s);
+      });
+      // Fix product references
+      const fixedSales = mergedSales.map((sale) => {
+        const product = mergedProducts.find((p) => p.id === sale.productId);
+        return {
+          ...sale,
+          productName: product ? product.name : "Unknown Product",
+          totalPrice: sale.totalPrice ?? sale.actualPrice * sale.quantity,
+          amountPaid: sale.amountPaid ?? 0,
+          balance:
+            sale.balance ??
+            (sale.totalPrice ?? sale.actualPrice * sale.quantity) -
+              (sale.amountPaid ?? 0),
+          isFullyPaid:
+            sale.isFullyPaid ??
+            (sale.balance ??
+              (sale.totalPrice ?? sale.actualPrice * sale.quantity) -
+                (sale.amountPaid ?? 0)) <= 0,
+          createdAt: sale.createdAt ?? new Date().toLocaleDateString(),
+          updatedAt: sale.updatedAt ?? new Date().toLocaleDateString(),
+        };
+      });
+      setSales(fixedSales);
+      localStorage.setItem("sales", JSON.stringify(fixedSales));
+    });
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {

@@ -1,74 +1,140 @@
 // src/pages/Sales.jsx
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { notification, Button, Space } from "antd";
 import { useOutletContext } from "react-router-dom";
-import Spinner from "@/components/antDesign/spin";
 import AddSaleDialog from "./AddingPages/AddSaleDialog";
-// import { calculateProfit } from "@/utils/profitUtils";
-import { useProfit } from "@/hooks/useProfit"; // ✅ import hook
+import { salesData } from "@/data/sales";
+import { useProfit } from "@/hooks/useProfit";
 
 import "../css/users.css";
 
 function Sales() {
   const { products, setProducts, sales, setSales } = useOutletContext();
-
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddSaleOpen, setIsAddSaleOpen] = useState(false);
+  const [editSale, setEditSale] = useState(null);
   const [detailsModal, setDetailsModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
   const [api, contextHolder] = notification.useNotification();
 
-  // if (!products || !sales) return <Spinner />;
-
-  // ✅ no rounding, use exact values
-  // const totalProfit = sales.reduce((acc, sale) => {
-  //   const product = products.find((p) => p.id === sale.productId);
-  //   const costPrice = product?.costPrice || 0;
-  //   const quantity = sale.quantity || 1;
-  //   return acc + (sale.actualPrice - costPrice) * quantity;
-  // }, 0);
-
-  // const profitLabel = totalProfit >= 0 ? "Gross Profit" : " Gross Loss";
-  // const displayAmount = Math.abs(totalProfit);
-  // ✅ removed .toFixed(2)
-
-  // Use utility
-  // const { profitLabel, displayAmount } = calculateProfit(sales, products);
-
   const { profitLabel, displayAmount } = useProfit(sales, products);
 
-  const term = searchTerm.toLowerCase().trim();
-  const filteredSales = sales.filter(
-    (s) =>
-      (s.productName?.toLowerCase() || "").includes(term) ||
-      (s.clientName?.toLowerCase() || "").includes(term) ||
-      (s.paymentType?.toLowerCase() || "").includes(term)
-  );
+  // Initialize sales from localStorage or fallback
+  useEffect(() => {
+    if (!products || products.length === 0) return;
 
-  const handleAddSale = (sale) => {
+    const storedSales = JSON.parse(localStorage.getItem("sales") || "null");
+    const sourceSales = storedSales?.length > 0 ? storedSales : salesData;
+
+    const updatedSales = sourceSales.map((s) => {
+      const product = products.find((p) => p.id === s.productId);
+      const totalPrice = s.totalPrice ?? s.actualPrice * s.quantity;
+      const amountPaid = s.amountPaid ?? 0;
+      const balance = s.balance ?? totalPrice - amountPaid;
+      const isFullyPaid = s.isFullyPaid ?? balance <= 0;
+
+      return {
+        ...s,
+        productName: product?.name || "Unknown Product",
+        totalPrice,
+        amountPaid,
+        balance,
+        isFullyPaid,
+      };
+    });
+
+    const computeSaleStatus = (sale) => {
+      if (!sale.originalSaleId) return sale;
+
+      const relatedSales = sales.filter(
+        (s) => s.originalSaleId === sale.originalSaleId
+      );
+      const totalPaid = relatedSales.reduce((sum, s) => sum + s.amountPaid, 0);
+      const totalPrice = sale.actualPrice * sale.quantity;
+      const balance = totalPrice - totalPaid;
+      const isFullyPaid = balance <= 0;
+
+      return {
+        ...sale,
+        totalPaid,
+        balance,
+        isFullyPaid,
+      };
+    };
+
+    setSales(updatedSales);
+    if (!storedSales?.length)
+      localStorage.setItem("sales", JSON.stringify(updatedSales));
+  }, [products]);
+
+  // Filtered sales for search
+  const filteredSales = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim();
+    return sales.filter(
+      (s) =>
+        s.productName?.toLowerCase().includes(term) ||
+        s.clientName?.toLowerCase().includes(term) ||
+        s.paymentType?.toLowerCase().includes(term)
+    );
+  }, [sales, searchTerm]);
+
+  // Add or Edit sale handler
+  const handleSaveSale = (sale) => {
     const product = products.find((p) => p.id === sale.productId);
     if (!product) return;
 
-    if (sale.quantity > product.stock) {
+    // Check stock availability
+    const availableStock = editSale
+      ? product.stock + editSale.quantity
+      : product.stock;
+    if (sale.quantity > availableStock) {
       api.error({
         message: "Insufficient Stock",
-        description: `Only ${product.stock} units available for ${product.name}`,
+        description: `Only ${availableStock} units available for ${product.name}`,
       });
       return;
     }
 
-    const newSale = { ...sale };
+    const totalPrice = sale.actualPrice * sale.quantity;
+    const amountPaid = sale.amountPaid || 0;
+    const balance = totalPrice - amountPaid;
+    const isFullyPaid = balance <= 0;
 
-    const updatedProducts = products.map((p) =>
-      p.id === product.id ? { ...p, stock: p.stock - sale.quantity } : p
-    );
+    const newSale = {
+      ...sale,
+      productName: product.name,
+      costPrice: product.costPrice || 0,
+      totalPrice,
+      balance,
+      isFullyPaid,
+      amountPaid,
+      createdAt: editSale?.createdAt || new Date().toLocaleDateString(),
+      updatedAt: new Date().toLocaleDateString(),
+    };
+
+    // Update stock
+    const updatedProducts = products.map((p) => {
+      if (p.id === product.id) {
+        const stockChange = editSale
+          ? sale.quantity - editSale.quantity
+          : sale.quantity;
+        return { ...p, stock: p.stock - stockChange };
+      }
+      return p;
+    });
     setProducts(updatedProducts);
     localStorage.setItem("products", JSON.stringify(updatedProducts));
 
-    const updatedSales = [...sales, newSale];
+    // Update sales
+    let updatedSales;
+    if (editSale) {
+      updatedSales = sales.map((s) => (s.id === editSale.id ? newSale : s));
+      setEditSale(null);
+    } else {
+      updatedSales = [...sales, newSale];
+    }
     setSales(updatedSales);
     localStorage.setItem("sales", JSON.stringify(updatedSales));
-
     setIsAddSaleOpen(false);
   };
 
@@ -76,20 +142,13 @@ function Sales() {
     setSelectedSale(sale);
     setDetailsModal(true);
   };
-  const closeDetails = () => {
-    setSelectedSale(null);
-    setDetailsModal(false);
-  };
+  const closeDetails = () => setDetailsModal(false);
+
   const handleDeleteSale = (saleId) => {
     const key = `delete${saleId}`;
-
     const btn = (
       <Space>
-        <Button
-          type="link"
-          size="small"
-          onClick={() => api.destroy(key)} // ✅ use api instance
-        >
+        <Button type="link" size="small" onClick={() => api.destroy(key)}>
           Cancel
         </Button>
         <Button
@@ -97,12 +156,22 @@ function Sales() {
           size="small"
           danger
           onClick={() => {
-            setSales((prevSales) => {
-              const updatedSales = prevSales.filter((s) => s.id !== saleId);
-              localStorage.setItem("sales", JSON.stringify(updatedSales));
-              return updatedSales;
-            });
-            api.destroy(key); // ✅ use api instance
+            const saleToDelete = sales.find((s) => s.id === saleId);
+            if (saleToDelete) {
+              // Restore stock on delete
+              const updatedProducts = products.map((p) =>
+                p.id === saleToDelete.productId
+                  ? { ...p, stock: p.stock + saleToDelete.quantity }
+                  : p
+              );
+              setProducts(updatedProducts);
+              localStorage.setItem("products", JSON.stringify(updatedProducts));
+            }
+
+            const updatedSales = sales.filter((s) => s.id !== saleId);
+            setSales(updatedSales);
+            localStorage.setItem("sales", JSON.stringify(updatedSales));
+            api.destroy(key);
           }}>
           Confirm
         </Button>
@@ -118,27 +187,16 @@ function Sales() {
     });
   };
 
-  console.log("Sales:", sales);
-  console.log("Products:", products);
+  const handleEditSale = (sale) => {
+    setEditSale(sale);
+    setIsAddSaleOpen(true);
+  };
 
   return (
     <>
       {contextHolder}
 
-      {/* Profit Card */}
-      <div
-        className="profit-card"
-        style={{
-          marginBottom: "20px",
-          padding: "15px",
-          background: "var(--bg-color)",
-          borderRadius: "8px",
-          border: "2px solid var(--primary-color)",
-          fontWeight: "bold",
-          fontSize: "18px",
-          boxShadow: "0 4px 6px var(--btn-hover-color)",
-          textAlign: "center",
-        }}>
+      <div className="profit-card">
         <h2>
           {profitLabel}: ${displayAmount}
         </h2>
@@ -168,7 +226,7 @@ function Sales() {
         </div>
 
         {filteredSales.length === 0 ? (
-          <p style={{ textAlign: "center", padding: "20px" }}>
+          <p className="no-data">
             {sales.length === 0 ? "No sales yet" : "No sales found"}
           </p>
         ) : (
@@ -180,29 +238,28 @@ function Sales() {
                   <th>Quantity</th>
                   <th>Client</th>
                   <th>Price</th>
+                  <th>Paid</th>
+                  <th>Balance</th>
+                  <th>Status</th>
                   <th>Payment</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredSales.map((sale) => (
+                  {filteredSales.map((sale) => (
+                   const updatedSale = computeSaleStatus(sale);
+                  return (
                   <tr key={sale.id}>
-                    <td data-label="Product" className="bold">
-                      {sale.productName}
+                    <td data-label="Product">{sale.productName}</td>
+                    <td data-label="Quantity">{sale.quantity}</td>
+                    <td data-label="Client">{sale.clientName}</td>
+                    <td data-label="Price">{sale.totalPrice}</td>
+                    <td data-label="Paid">{sale.amountPaid}</td>
+                    <td data-label="Balance">{sale.balance}</td>
+                    <td data-label="Status">
+                      {sale.isFullyPaid ? "Paid" : "Pending"}
                     </td>
-                    <td data-label="Quantity" className="bold">
-                      {sale.quantity}
-                    </td>
-                    <td data-label="Client" className="bold">
-                      {sale.clientName}
-                    </td>
-                    <td data-label="Price" className="bold">
-                      ${sale.actualPrice * (sale.quantity || 1)}{" "}
-                      {/* ✅ no .toFixed */}
-                    </td>
-                    <td data-label="Payment" className="bold">
-                      {sale.paymentType}
-                    </td>
+                    <td data-label="Payment">{sale.paymentType}</td>
                     <td data-label="Actions" className="actions-buttons-table">
                       <div className="action-buttons">
                         <button
@@ -210,7 +267,9 @@ function Sales() {
                           onClick={() => openDetails(sale)}>
                           <i className="fa fa-eye"></i>
                         </button>
-                        <button className="btn-icon">
+                        <button
+                          className="btn-icon"
+                          onClick={() => handleEditSale(sale)}>
                           <i className="fa fa-edit"></i>
                         </button>
                         <button
@@ -220,7 +279,9 @@ function Sales() {
                         </button>
                       </div>
                     </td>
-                  </tr>
+
+                    </tr>
+
                 ))}
               </tbody>
             </table>
@@ -237,10 +298,13 @@ function Sales() {
                 <label>Quantity:</label>
                 <p>{selectedSale.quantity}</p>
                 <label>Price:</label>
-                <p>
-                  ${selectedSale.actualPrice * (selectedSale.quantity || 1)}{" "}
-                  {/* ✅ no .toFixed */}
-                </p>
+                <p>${selectedSale.totalPrice}</p>
+                <label>Amount Paid:</label>
+                <p>${selectedSale.amountPaid}</p>
+                <label>Balance:</label>
+                <p>${selectedSale.balance}</p>
+                <label>Status:</label>
+                <p>{selectedSale.isFullyPaid ? "Paid" : "Pending"}</p>
                 <label>Payment:</label>
                 <p>{selectedSale.paymentType}</p>
                 <label>Client Name:</label>
@@ -261,8 +325,23 @@ function Sales() {
 
         <AddSaleDialog
           isOpen={isAddSaleOpen}
-          onClose={() => setIsAddSaleOpen(false)}
-          onAddSale={handleAddSale}
+          onClose={() => {
+            setIsAddSaleOpen(false);
+            setEditSale(null);
+          }}
+          onAddSale={(sale, mode) => {
+            let updatedSales;
+            if (mode === "edit") {
+              updatedSales = sales.map((s) => (s.id === sale.id ? sale : s));
+            } else {
+              updatedSales = [...sales, sale];
+              localStorage.setItem("saleCounter", sale.id); // update counter
+            }
+            setSales(updatedSales);
+            localStorage.setItem("sales", JSON.stringify(updatedSales));
+          }}
+          dataToEdit={editSale}
+          mode={editSale ? "edit" : "add"}
         />
       </div>
     </>

@@ -14,8 +14,6 @@ import { useNetProfit } from "@/hooks/useNetProfit";
 import { useExpenses } from "@/hooks/useExpenses";
 // // to pass expenses
 
-import { useOutletContext } from "react-router-dom";
-
 const Dashboard = () => {
   // Safe defaults to prevent undefined errors
   const {

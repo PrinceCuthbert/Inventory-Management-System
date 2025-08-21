@@ -18,6 +18,10 @@ function Products() {
 
   const [api, contextHolder] = notification.useNotification();
   // Persist products in localStorage on first load
+
+  // useEffect(() => {
+  //   console.log("Products state at useEffect:", products);
+  // }, [products]);
   useEffect(() => {
     const stored = localStorage.getItem("products");
     if (stored) {
@@ -126,8 +130,14 @@ function Products() {
     });
   };
 
-  console.log("Products:", products);
-  console.log("Sales:", sales);
+  // console.log("Products:", products);
+  // console.log("Sales:", sales);
+
+  // console.log("Products:", products);
+  // console.log(
+  //   "Looking for productId 3:",
+  //   products.find((p) => p.id === 3)
+  // );
 
   return (
     <>

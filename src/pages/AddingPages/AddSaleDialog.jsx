@@ -1,25 +1,49 @@
 import React, { useState, useEffect } from "react";
 import "../../css/users.css";
 
-export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
+export default function AddSaleDialog({
+  isOpen,
+  onClose,
+  onAddSale,
+  dataToEdit = null,
+  mode = "add",
+}) {
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     productId: "",
     quantity: 1,
     actualPrice: "",
+    amountPaid: 0,
     paymentType: "CASH",
     clientName: "",
     clientContact: "",
     description: "",
   });
-
+  const [originalSaleId, setOriginalSaleId] = useState(null);
   const paymentMethods = ["CASH", "MOMO", "INSTALLMENTS", "LOAN"];
 
   useEffect(() => {
-    // ✅ Load products from localStorage once
     const storedProducts = JSON.parse(localStorage.getItem("products") || "[]");
     setProducts(storedProducts);
   }, []);
+
+  useEffect(() => {
+    if (dataToEdit) {
+      setFormData({
+        productId: dataToEdit.productId,
+        quantity: dataToEdit.quantity,
+        actualPrice: dataToEdit.actualPrice,
+        amountPaid: dataToEdit.amountPaid,
+        paymentType: dataToEdit.paymentType,
+        clientName: dataToEdit.clientName,
+        clientContact: dataToEdit.clientContact,
+        description: dataToEdit.description,
+      });
+      setOriginalSaleId(dataToEdit.originalSaleId || dataToEdit.id);
+    } else {
+      setOriginalSaleId(null);
+    }
+  }, [dataToEdit]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,57 +52,56 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // ✅ Find selected product
     const selectedProduct = products.find(
-      (p) => String(p.id) === String(formData.productId) // safer string comparison
+      (p) => String(p.id) === String(formData.productId)
     );
+    if (!selectedProduct) return alert("Select a valid product");
 
-    if (!selectedProduct) {
-      alert("Please select a valid product.");
-      return;
-    }
-
-    // ✅ Validate quantity against stock
     const qty = parseInt(formData.quantity);
-    if (qty > selectedProduct.stock) {
-      alert(`Cannot sell more than available stock: ${selectedProduct.stock}`);
-      return;
-    }
+    const availableStock = dataToEdit
+      ? selectedProduct.stock + dataToEdit.quantity
+      : selectedProduct.stock;
+    if (qty > availableStock)
+      return alert(`Cannot sell more than stock: ${availableStock}`);
 
-    // ✅ SAFER sale ID generator (saleCounter in localStorage)
-    // Get last used ID from localStorage
-    let saleCounter = Number(localStorage.getItem("saleCounter") || "0");
+    const totalPrice = parseFloat(formData.actualPrice) * qty;
+    const amountPaid = parseFloat(formData.amountPaid || 0);
+    const balance = totalPrice - amountPaid;
+    const isFullyPaid = balance <= 0;
 
-    // Increment counter for new sale
-    saleCounter += 1;
-
-    // Save updated counter back to localStorage
-    localStorage.setItem("saleCounter", saleCounter);
-
-    // ✅ Build sale object
-    const newSale = {
-      id: saleCounter, // never reused, always increasing
+    const salePayload = {
+      id:
+        dataToEdit?.id || Number(localStorage.getItem("saleCounter") || 0) + 1,
       productId: selectedProduct.id,
       productName: selectedProduct.name,
       costPrice: selectedProduct.costPrice || 0,
       quantity: qty,
       actualPrice: parseFloat(formData.actualPrice),
+      totalPrice,
+      amountPaid,
+      originalSaleId:
+        originalSaleId ||
+        dataToEdit?.id ||
+        Number(localStorage.getItem("saleCounter") || 0) + 1,
+      balance,
+      isFullyPaid,
       paymentType: formData.paymentType,
       clientName: formData.clientName,
       clientContact: formData.clientContact,
       description: formData.description,
-      createdAt: new Date().toLocaleDateString(),
+      createdAt: dataToEdit?.createdAt || new Date().toLocaleDateString(),
+      updatedAt: new Date().toLocaleDateString(),
     };
 
-    // ✅ Pass newSale to parent
-    onAddSale(newSale);
+    if (!dataToEdit) localStorage.setItem("saleCounter", salePayload.id);
 
-    // ✅ Reset form
+    onAddSale(salePayload, mode);
+
     setFormData({
       productId: "",
       quantity: 1,
       actualPrice: "",
+      amountPaid: 0,
       paymentType: "CASH",
       clientName: "",
       clientContact: "",
@@ -90,16 +113,20 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
 
   if (!isOpen) return null;
 
-  // ✅ Dynamically check selected product to limit quantity dropdown
   const selectedProduct = products.find(
     (p) => String(p.id) === String(formData.productId)
   );
+  const currentAvailableStock = selectedProduct
+    ? dataToEdit
+      ? selectedProduct.stock + dataToEdit.quantity
+      : selectedProduct.stock
+    : 0;
 
   return (
     <div className="popup-overlay">
       <div className="add-user">
         <div className="title">
-          <p>Add Sale</p>
+          <p>{mode === "edit" ? "Edit Sale" : "Add Sale"}</p>
           <i className="fa fa-times fa-xs" onClick={onClose}></i>
         </div>
 
@@ -107,7 +134,7 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
           <div className="form-group">
             {/* Product */}
             <div>
-              <label htmlFor="productId">Product</label>
+              <label>Product</label>
               <select
                 name="productId"
                 value={formData.productId}
@@ -124,16 +151,16 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
 
             {/* Quantity */}
             <div>
-              <label htmlFor="quantity">Quantity</label>
+              <label>Quantity</label>
               <select
                 name="quantity"
                 value={formData.quantity}
                 onChange={handleChange}
                 required
                 disabled={!selectedProduct}>
-                {selectedProduct ? (
+                {currentAvailableStock > 0 ? (
                   Array.from(
-                    { length: selectedProduct.stock },
+                    { length: currentAvailableStock },
                     (_, i) => i + 1
                   ).map((n) => (
                     <option key={n} value={n}>
@@ -148,19 +175,33 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
 
             {/* Price */}
             <div>
-              <label htmlFor="actualPrice">Price</label>
+              <label>Price per Unit</label>
               <input
                 type="number"
                 name="actualPrice"
                 value={formData.actualPrice}
                 onChange={handleChange}
+                min="0"
                 required
               />
             </div>
 
-            {/* Payment type */}
+            {/* Amount Paid */}
             <div>
-              <label htmlFor="paymentType">Payment Type</label>
+              <label>Amount Paid</label>
+              <input
+                type="number"
+                name="amountPaid"
+                value={formData.amountPaid}
+                onChange={handleChange}
+                min="0"
+                placeholder="0 if unpaid"
+              />
+            </div>
+
+            {/* Payment Type */}
+            <div>
+              <label>Payment Type</label>
               <select
                 name="paymentType"
                 value={formData.paymentType}
@@ -174,18 +215,17 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
               </select>
             </div>
 
-            {/* Client info */}
+            {/* Client Info */}
             <div>
-              <label htmlFor="clientName">Client Name</label>
+              <label>Client Name</label>
               <input
                 name="clientName"
                 value={formData.clientName}
                 onChange={handleChange}
               />
             </div>
-
             <div>
-              <label htmlFor="clientContact">Client Contact</label>
+              <label>Client Contact</label>
               <input
                 name="clientContact"
                 value={formData.clientContact}
@@ -195,7 +235,7 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
 
             {/* Description */}
             <div>
-              <label htmlFor="description">Description</label>
+              <label>Description</label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -206,7 +246,9 @@ export default function AddSaleDialog({ isOpen, onClose, onAddSale }) {
           </div>
 
           <div className="form-actions">
-            <button type="submit">Add Sale</button>
+            <button type="submit" disabled={currentAvailableStock === 0}>
+              {mode === "edit" ? "Update Sale" : "Add Sale"}
+            </button>
             <button type="button" className="cancel-btn" onClick={onClose}>
               Cancel
             </button>
