@@ -46,7 +46,7 @@ function Expenses() {
       }
     };
     fetchExpenses();
-  }, []);
+  }, [setExpenses]);
 
   // Calculate total expenses dynamically
   // const totalExpenses = expenses.reduce(

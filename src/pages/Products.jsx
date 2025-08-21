@@ -40,7 +40,7 @@ function Products() {
         localStorage.setItem("products", JSON.stringify(normalized));
       });
     }
-  }, []);
+  }, [setProducts]);
 
   if (!products) return <Spinner />; // Show spinner until products are loaded
 
@@ -72,7 +72,7 @@ function Products() {
 
   const handleAddProduct = (newProduct) => {
     const nextId = products.length
-      ? Math.max(...products.map((p) => p.id || 0)) + 1
+      ? Math.max(...products.map((p) => p.id)) + 1
       : 1;
 
     // const productWithId = { ...newProduct, id: nextId };

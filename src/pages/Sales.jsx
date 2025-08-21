@@ -5,7 +5,6 @@ import { useOutletContext } from "react-router-dom";
 import AddSaleDialog from "./AddingPages/AddSaleDialog";
 import { salesData } from "@/data/sales";
 import { useProfit } from "@/hooks/useProfit";
-
 import "../css/users.css";
 
 function Sales() {
@@ -19,19 +18,19 @@ function Sales() {
 
   const { profitLabel, displayAmount } = useProfit(sales, products);
 
-  // Initialize sales from localStorage or fallback
+  // Load sales from localStorage or fallback to salesData
   useEffect(() => {
     if (!products || products.length === 0) return;
 
     const storedSales = JSON.parse(localStorage.getItem("sales") || "null");
-    const sourceSales = storedSales?.length > 0 ? storedSales : salesData;
+    const sourceSales = storedSales?.length ? storedSales : salesData;
 
     const updatedSales = sourceSales.map((s) => {
       const product = products.find((p) => p.id === s.productId);
       const totalPrice = s.totalPrice ?? s.actualPrice * s.quantity;
       const amountPaid = s.amountPaid ?? 0;
-      const balance = s.balance ?? totalPrice - amountPaid;
-      const isFullyPaid = s.isFullyPaid ?? balance <= 0;
+      const balance = totalPrice - amountPaid;
+      const isFullyPaid = balance <= 0;
 
       return {
         ...s,
@@ -43,31 +42,12 @@ function Sales() {
       };
     });
 
-    const computeSaleStatus = (sale) => {
-      if (!sale.originalSaleId) return sale;
-
-      const relatedSales = sales.filter(
-        (s) => s.originalSaleId === sale.originalSaleId
-      );
-      const totalPaid = relatedSales.reduce((sum, s) => sum + s.amountPaid, 0);
-      const totalPrice = sale.actualPrice * sale.quantity;
-      const balance = totalPrice - totalPaid;
-      const isFullyPaid = balance <= 0;
-
-      return {
-        ...sale,
-        totalPaid,
-        balance,
-        isFullyPaid,
-      };
-    };
-
     setSales(updatedSales);
     if (!storedSales?.length)
       localStorage.setItem("sales", JSON.stringify(updatedSales));
-  }, [products]);
+  }, [products, setSales]);
 
-  // Filtered sales for search
+  // Filter sales based on search
   const filteredSales = useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
     return sales.filter(
@@ -78,7 +58,7 @@ function Sales() {
     );
   }, [sales, searchTerm]);
 
-  // Add or Edit sale handler
+  // Add/Edit sale handler
   const handleSaveSale = (sale) => {
     const product = products.find((p) => p.id === sale.productId);
     if (!product) return;
@@ -87,6 +67,7 @@ function Sales() {
     const availableStock = editSale
       ? product.stock + editSale.quantity
       : product.stock;
+
     if (sale.quantity > availableStock) {
       api.error({
         message: "Insufficient Stock",
@@ -95,44 +76,22 @@ function Sales() {
       return;
     }
 
-    const totalPrice = sale.actualPrice * sale.quantity;
-    const amountPaid = sale.amountPaid || 0;
-    const balance = totalPrice - amountPaid;
-    const isFullyPaid = balance <= 0;
-
-    const newSale = {
-      ...sale,
-      productName: product.name,
-      costPrice: product.costPrice || 0,
-      totalPrice,
-      balance,
-      isFullyPaid,
-      amountPaid,
-      createdAt: editSale?.createdAt || new Date().toLocaleDateString(),
-      updatedAt: new Date().toLocaleDateString(),
-    };
-
-    // Update stock
-    const updatedProducts = products.map((p) => {
-      if (p.id === product.id) {
-        const stockChange = editSale
-          ? sale.quantity - editSale.quantity
-          : sale.quantity;
-        return { ...p, stock: p.stock - stockChange };
-      }
-      return p;
-    });
+    const updatedProducts = products.map((p) =>
+      p.id === product.id
+        ? { ...p, stock: p.stock - (sale.quantity - (editSale?.quantity || 0)) }
+        : p
+    );
     setProducts(updatedProducts);
     localStorage.setItem("products", JSON.stringify(updatedProducts));
 
-    // Update sales
     let updatedSales;
     if (editSale) {
-      updatedSales = sales.map((s) => (s.id === editSale.id ? newSale : s));
+      updatedSales = sales.map((s) => (s.id === editSale.id ? sale : s));
       setEditSale(null);
     } else {
-      updatedSales = [...sales, newSale];
+      updatedSales = [...sales, sale];
     }
+
     setSales(updatedSales);
     localStorage.setItem("sales", JSON.stringify(updatedSales));
     setIsAddSaleOpen(false);
@@ -157,20 +116,21 @@ function Sales() {
           danger
           onClick={() => {
             const saleToDelete = sales.find((s) => s.id === saleId);
-            if (saleToDelete) {
-              // Restore stock on delete
-              const updatedProducts = products.map((p) =>
-                p.id === saleToDelete.productId
-                  ? { ...p, stock: p.stock + saleToDelete.quantity }
-                  : p
-              );
-              setProducts(updatedProducts);
-              localStorage.setItem("products", JSON.stringify(updatedProducts));
-            }
+            if (!saleToDelete) return;
+
+            // Restore stock
+            const updatedProducts = products.map((p) =>
+              p.id === saleToDelete.productId
+                ? { ...p, stock: p.stock + saleToDelete.quantity }
+                : p
+            );
+            setProducts(updatedProducts);
+            localStorage.setItem("products", JSON.stringify(updatedProducts));
 
             const updatedSales = sales.filter((s) => s.id !== saleId);
             setSales(updatedSales);
             localStorage.setItem("sales", JSON.stringify(updatedSales));
+
             api.destroy(key);
           }}>
           Confirm
@@ -186,16 +146,41 @@ function Sales() {
       duration: 0,
     });
   };
+  const handleAddPayment = (saleId, paymentAmount) => {
+    const updatedSales = sales.map((s) => {
+      if (s.id !== saleId) return s;
 
-  const handleEditSale = (sale) => {
-    setEditSale(sale);
-    setIsAddSaleOpen(true);
+      if (paymentAmount > s.balance) {
+        alert(`Cannot pay more than remaining balance: ${s.balance}`);
+        return s;
+      }
+
+      const newPayment = {
+        amount: paymentAmount,
+        date: new Date().toLocaleDateString(),
+      };
+
+      const allPayments = [...s.payments, newPayment];
+      const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
+      const balance = s.totalPrice - totalPaid;
+
+      return {
+        ...s,
+        payments: allPayments,
+        balance,
+        amountPaid: totalPaid,
+        isFullyPaid: balance <= 0,
+        updatedAt: new Date().toLocaleDateString(),
+      };
+    });
+
+    setSales(updatedSales);
+    localStorage.setItem("sales", JSON.stringify(updatedSales));
   };
 
   return (
     <>
       {contextHolder}
-
       <div className="profit-card">
         <h2>
           {profitLabel}: ${displayAmount}
@@ -246,10 +231,8 @@ function Sales() {
                 </tr>
               </thead>
               <tbody>
-                  {filteredSales.map((sale) => (
-                   const updatedSale = computeSaleStatus(sale);
-                  return (
-                  <tr key={sale.id}>
+                {filteredSales.map((sale) => (
+                  <tr key={`${sale.id}-${sale.productId}`}>
                     <td data-label="Product">{sale.productName}</td>
                     <td data-label="Quantity">{sale.quantity}</td>
                     <td data-label="Client">{sale.clientName}</td>
@@ -269,8 +252,21 @@ function Sales() {
                         </button>
                         <button
                           className="btn-icon"
-                          onClick={() => handleEditSale(sale)}>
+                          onClick={() =>
+                            setEditSale(sale) || setIsAddSaleOpen(true)
+                          }>
                           <i className="fa fa-edit"></i>
+                        </button>
+                        <button
+                          className="btn-icon"
+                          onClick={() => {
+                            const amount = parseFloat(
+                              prompt("Enter payment amount:")
+                            );
+                            if (!isNaN(amount))
+                              handleAddPayment(sale.id, amount);
+                          }}>
+                          <i className="fa fa-hand-holding-usd"></i>
                         </button>
                         <button
                           className="btn-icon delete"
@@ -279,9 +275,7 @@ function Sales() {
                         </button>
                       </div>
                     </td>
-
-                    </tr>
-
+                  </tr>
                 ))}
               </tbody>
             </table>
@@ -293,28 +287,26 @@ function Sales() {
             <div className="dialog-box" onClick={(e) => e.stopPropagation()}>
               <h3>Sale Details</h3>
               <div className="dialog-content">
-                <label>Product:</label>
-                <p>{selectedSale.productName}</p>
-                <label>Quantity:</label>
-                <p>{selectedSale.quantity}</p>
-                <label>Price:</label>
-                <p>${selectedSale.totalPrice}</p>
-                <label>Amount Paid:</label>
-                <p>${selectedSale.amountPaid}</p>
-                <label>Balance:</label>
-                <p>${selectedSale.balance}</p>
-                <label>Status:</label>
-                <p>{selectedSale.isFullyPaid ? "Paid" : "Pending"}</p>
-                <label>Payment:</label>
-                <p>{selectedSale.paymentType}</p>
-                <label>Client Name:</label>
-                <p>{selectedSale.clientName}</p>
-                <label>Client Contact:</label>
-                <p>{selectedSale.clientContact}</p>
-                <label>Description:</label>
-                <p>{selectedSale.description || "No description"}</p>
-                <label>Created At:</label>
-                <p>{selectedSale.createdAt}</p>
+                {Object.entries(selectedSale).map(([key, value]) => (
+                  <div key={key}>
+                    <label>{key.replace(/([A-Z])/g, " $1")}:</label>
+                    {Array.isArray(value) ? (
+                      <ul>
+                        {value.map((item, i) => (
+                          <li key={i}>
+                            {typeof item === "object"
+                              ? JSON.stringify(item)
+                              : item}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : typeof value === "object" && value !== null ? (
+                      <pre>{JSON.stringify(value, null, 2)}</pre>
+                    ) : (
+                      <p>{value?.toString()}</p>
+                    )}
+                  </div>
+                ))}
               </div>
               <button className="btn-close" onClick={closeDetails}>
                 Close
@@ -325,21 +317,8 @@ function Sales() {
 
         <AddSaleDialog
           isOpen={isAddSaleOpen}
-          onClose={() => {
-            setIsAddSaleOpen(false);
-            setEditSale(null);
-          }}
-          onAddSale={(sale, mode) => {
-            let updatedSales;
-            if (mode === "edit") {
-              updatedSales = sales.map((s) => (s.id === sale.id ? sale : s));
-            } else {
-              updatedSales = [...sales, sale];
-              localStorage.setItem("saleCounter", sale.id); // update counter
-            }
-            setSales(updatedSales);
-            localStorage.setItem("sales", JSON.stringify(updatedSales));
-          }}
+          onClose={() => setIsAddSaleOpen(false)}
+          onAddSale={handleSaveSale}
           dataToEdit={editSale}
           mode={editSale ? "edit" : "add"}
         />

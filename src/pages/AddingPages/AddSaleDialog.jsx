@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../../css/users.css";
+import FormInput from "@/forms/FormInput";
+import FormSelect from "@/forms/FormSelect";
 
 export default function AddSaleDialog({
   isOpen,
@@ -20,6 +22,7 @@ export default function AddSaleDialog({
     description: "",
   });
   const [originalSaleId, setOriginalSaleId] = useState(null);
+
   const paymentMethods = ["CASH", "MOMO", "INSTALLMENTS", "LOAN"];
 
   useEffect(() => {
@@ -45,9 +48,8 @@ export default function AddSaleDialog({
     }
   }, [dataToEdit]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = (e) => {
@@ -69,15 +71,22 @@ export default function AddSaleDialog({
     const balance = totalPrice - amountPaid;
     const isFullyPaid = balance <= 0;
 
+    // const nextId =
+    //   dataToEdit?.id || Number(localStorage.getItem("saleCounter") || 0) + 1;
+
+    // const saleCounter = Number(localStorage.getItem("saleCounter") || 0) + 1;
+
+    const saleCounter = Number(localStorage.getItem("saleCounter") || 0) + 1;
+
     const salePayload = {
-      id:
-        dataToEdit?.id || Number(localStorage.getItem("saleCounter") || 0) + 1,
+      id: dataToEdit?.id || Date.now(),
       productId: selectedProduct.id,
       productName: selectedProduct.name,
       costPrice: selectedProduct.costPrice || 0,
       quantity: qty,
       actualPrice: parseFloat(formData.actualPrice),
       totalPrice,
+      payments: [{ amount: amountPaid, date: new Date().toLocaleDateString() }],
       amountPaid,
       originalSaleId:
         originalSaleId ||
@@ -93,7 +102,7 @@ export default function AddSaleDialog({
       updatedAt: new Date().toLocaleDateString(),
     };
 
-    if (!dataToEdit) localStorage.setItem("saleCounter", salePayload.id);
+    if (!dataToEdit) localStorage.setItem("saleCounter", saleCounter);
 
     onAddSale(salePayload, mode);
 
@@ -132,117 +141,70 @@ export default function AddSaleDialog({
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            {/* Product */}
-            <div>
-              <label>Product</label>
-              <select
-                name="productId"
-                value={formData.productId}
-                onChange={handleChange}
-                required>
-                <option value="">Select product</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} (Stock: {p.stock})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FormSelect
+              label="Product"
+              value={formData.productId}
+              onChange={(val) => handleChange("productId", val)}
+              options={products.map((p) => ({
+                label: `${p.name} (Stock: ${p.stock})`,
+                // value: String(p.id),
+                value: p.id,
+              }))}
+            />
 
-            {/* Quantity */}
-            <div>
-              <label>Quantity</label>
-              <select
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                required
-                disabled={!selectedProduct}>
-                {currentAvailableStock > 0 ? (
-                  Array.from(
-                    { length: currentAvailableStock },
-                    (_, i) => i + 1
-                  ).map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))
-                ) : (
-                  <option value="1">1</option>
-                )}
-              </select>
-            </div>
+            <FormSelect
+              label="Quantity"
+              value={formData.quantity}
+              onChange={(val) => handleChange("quantity", val)}
+              options={
+                currentAvailableStock > 0
+                  ? Array.from({ length: currentAvailableStock }, (_, i) => ({
+                      key: `qty-${i + 1}`, // ✅ unique key
+                      label: i + 1,
+                      value: i + 1,
+                    }))
+                  : [{ key: "qty-1", label: 1, value: 1 }]
+              }
+            />
 
-            {/* Price */}
-            <div>
-              <label>Price per Unit</label>
-              <input
-                type="number"
-                name="actualPrice"
-                value={formData.actualPrice}
-                onChange={handleChange}
-                min="0"
-                required
-              />
-            </div>
+            <FormInput
+              label="Price per Unit"
+              type="number"
+              value={formData.actualPrice}
+              onChange={(val) => handleChange("actualPrice", val)}
+            />
 
-            {/* Amount Paid */}
-            <div>
-              <label>Amount Paid</label>
-              <input
-                type="number"
-                name="amountPaid"
-                value={formData.amountPaid}
-                onChange={handleChange}
-                min="0"
-                placeholder="0 if unpaid"
-              />
-            </div>
+            <FormInput
+              label="Amount Paid"
+              type="number"
+              value={formData.amountPaid}
+              onChange={(val) => handleChange("amountPaid", val)}
+            />
 
-            {/* Payment Type */}
-            <div>
-              <label>Payment Type</label>
-              <select
-                name="paymentType"
-                value={formData.paymentType}
-                onChange={handleChange}
-                required>
-                {paymentMethods.map((method) => (
-                  <option key={method} value={method}>
-                    {method.charAt(0) + method.slice(1).toLowerCase()}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FormSelect
+              label="Payment Type"
+              value={formData.paymentType}
+              onChange={(val) => handleChange("paymentType", val)}
+              options={paymentMethods.map((m) => ({ label: m, value: m }))}
+            />
 
-            {/* Client Info */}
-            <div>
-              <label>Client Name</label>
-              <input
-                name="clientName"
-                value={formData.clientName}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Client Contact</label>
-              <input
-                name="clientContact"
-                value={formData.clientContact}
-                onChange={handleChange}
-              />
-            </div>
+            <FormInput
+              label="Client Name"
+              value={formData.clientName}
+              onChange={(val) => handleChange("clientName", val)}
+            />
 
-            {/* Description */}
-            <div>
-              <label>Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
-              />
-            </div>
+            <FormInput
+              label="Client Contact"
+              value={formData.clientContact}
+              onChange={(val) => handleChange("clientContact", val)}
+            />
+
+            <FormInput
+              label="Description"
+              value={formData.description}
+              onChange={(val) => handleChange("description", val)}
+            />
           </div>
 
           <div className="form-actions">

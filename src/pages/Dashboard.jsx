@@ -1,5 +1,6 @@
-// src/pages/Dashboard.jsx
-import React, { useMemo } from "react";
+import { useMemo } from "react";
+import { useOutletContext } from "react-router-dom";
+
 import LineCharts from "@/components/Recharts/LineCharts"; // Monthly Revenue & Expenses
 import StockChart from "@/components/chartjs/StockChart"; // Daily Sales Trend
 import BarCharts from "@/components/Recharts/BarCharts"; // Monthly Profit Analysis
@@ -7,10 +8,10 @@ import CategoryChart from "@/components/chartjs/CategoryChart"; // Stock by Cate
 import StockDoughnutChart from "@/components/chartjs/StockDoughnutChart"; // Payment Methods
 import "@/css/dashboard.css";
 import StatCard from "@/components/statCard";
-import { calculateProfit } from "@/utils/profitUtils";
+// import { calculateProfit } from "@/utils/profitUtils";
 import { useProfit } from "@/hooks/useProfit";
 
-import { useNetProfit } from "@/hooks/useNetProfit";
+// import { useNetProfit } from "@/hooks/useNetProfit";
 import { useExpenses } from "@/hooks/useExpenses";
 // // to pass expenses
 

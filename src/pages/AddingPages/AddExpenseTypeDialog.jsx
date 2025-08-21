@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../../css/users.css";
-import { expenseTypes } from "@/data/expenseTypes";
+// import { expenseTypes } from "@/data/expenseTypes";
 
 export default function AddExpenseTypeDialog({
   isOpen,
