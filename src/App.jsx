@@ -9,35 +9,39 @@ import Brands from "./pages/brands";
 import Sales from "./pages/Sales";
 import ExpenseTypes from "./pages/ExpenseTypes";
 import Expenses from "./pages/Expenses";
+import Settings from "./pages/Settings/Settings";
+import Login from "./pages/Login";
 import "./App.css";
-import {QueryProvider} from "@/utils/QueryClientSetup.jsx";
-import AddProduct from "@/pages/Product/AddProduct";
+import { QueryProvider } from "@/utils/QueryClientSetup.jsx";
+// import AddProduct from "@/pages/Product/AddProduct";
+import AddProduct from "./pages/Product/AddProduct";
 
 function App() {
   return (
-      <QueryProvider>
-          <Routes>
-              {/* Redirect root `/` to `/HomePage` */}
-              <Route path="/" element={<Navigate to="/HomePage" />} />
+    <QueryProvider>
+      <Routes>
+        {/* Redirect root `/` to `/HomePage` */}
+        <Route path="/" element={<Navigate to="/HomePage" />} />
+        <Route path="/login" element={<Login />} />
 
-              {/* Layout route */}
-              <Route path="/HomePage" element={<HomePage />}>
-                  {/* Default page in Outlet */}
-                  <Route path="dashboard" element={<Dashboard />} />
+        {/* Layout route */}
+        <Route path="/HomePage" element={<HomePage />}>
+          {/* Default page in Outlet */}
+          <Route path="dashboard" element={<Dashboard />} />
 
-                  {/* This will render inside <Outlet /> */}
-                  <Route path="users" element={<Users />} />
-                  <Route path="products" element={<Products />} />
-                  <Route path="products/add" element={<AddProduct />} />
-                  <Route path="categories" element={<Categories />} />
-                  <Route path="brands" element={<Brands />} />
-                  <Route path="sales" element={<Sales />} />
-                  <Route path="expenseTypes" element={<ExpenseTypes />} />
-                  <Route path="expenses" element={<Expenses />} />
-              </Route>
-          </Routes>
-      </QueryProvider>
-
+          {/* This will render inside <Outlet /> */}
+          <Route path="users" element={<Users />} />
+          <Route path="products" element={<Products />} />
+          <Route path="products/add" element={<AddProduct />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="brands" element={<Brands />} />
+          <Route path="sales" element={<Sales />} />
+          <Route path="expenseTypes" element={<ExpenseTypes />} />
+          <Route path="expenses" element={<Expenses />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+      </Routes>
+    </QueryProvider>
   );
 }
 
