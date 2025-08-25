@@ -9,7 +9,7 @@ import Brands from "./pages/brands";
 import Sales from "./pages/Sales";
 import ExpenseTypes from "./pages/ExpenseTypes";
 import Expenses from "./pages/Expenses";
-import Settings from "./pages/Settings/Settings";
+// import Settings from "./pages/";
 import Login from "./pages/Login";
 import "./App.css";
 import { QueryProvider } from "@/utils/QueryClientSetup.jsx";
@@ -38,7 +38,7 @@ function App() {
           <Route path="sales" element={<Sales />} />
           <Route path="expenseTypes" element={<ExpenseTypes />} />
           <Route path="expenses" element={<Expenses />} />
-          <Route path="settings" element={<Settings />} />
+          {/*<Route path="settings" element={<Settings />} />*/}
         </Route>
       </Routes>
     </QueryProvider>

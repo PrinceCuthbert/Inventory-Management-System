@@ -8,7 +8,7 @@ export default function AddUserDialog({ isOpen, onClose, onAddUser }) {
     username: "",
     contact: "",
     password: "",
-    role: "Staff",
+    role: "cashier",
   });
 
   const handleChange = (e) => {
@@ -105,8 +105,8 @@ export default function AddUserDialog({ isOpen, onClose, onAddUser }) {
                 onChange={handleChange}
                 required>
                 <option value="">Select Role</option>
-                <option>Admin</option>
-                <option>Staff</option>
+                <option value="admin">Admin</option>
+                <option value="cashier">Cashier</option>
               </select>
             </div>
           </div>
